@@ -1,7 +1,7 @@
 from django.views.decorators.http import require_GET, require_POST
 import json
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth import authenticate, login as django_login, logout
+from django.contrib.auth import authenticate, login as django_login, logout as django_logout
 from django.template import RequestContext
 from django.shortcuts import render_to_response, redirect
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
@@ -10,6 +10,8 @@ from django.core.urlresolvers import reverse
 from Course.models import Course
 from django.conf import settings
 from django.http import Http404
+
+from middleware.ZIDAuthenticationMiddleware import ZIDAuthenticationMiddleware
 
 from AuroraProject.decorators import aurora_login_required
 
@@ -50,7 +52,7 @@ def signin(request, course_short_title=None):
 
 
 def signout(request, course_short_title=None):
-    logout(request)
+    django_logout(request)
     return redirect(reverse('home', args=(course_short_title,)))
 
 
@@ -79,7 +81,7 @@ def login(request, course_short_title=None):
 
 
 @require_GET
-def sso_auth_callback(request):
+def sso_login_callback(request):
     """
     This view is used in conjunction with ZIDAuthenticationMiddleware
     :param request:
@@ -112,6 +114,19 @@ def sso_auth_callback(request):
         return HttpResponseRedirect(request.GET.get('param', ""))
 
     return redirect(reverse('course_selection'))
+
+@require_GET
+def sso_logout_callback(request):
+
+    user = authenticate(params=request.GET)
+
+    if user is None:
+        logger.error("No user found to logout")
+        return redirect(ZIDAuthenticationMiddleware.LOGOUT_FAILED)
+
+    django_logout(request)
+
+    return redirect(ZIDAuthenticationMiddleware.LOGOUT_SUCCESSFUL)
 
 
 @aurora_login_required()

@@ -9,6 +9,10 @@ logger = logging.getLogger("ZidSSOBackend")
 
 
 class ZIDAuthenticationMiddleware(object):
+    LOGOUT_SUCCESSFUL = 'https://iu.zid.tuwien.ac.at/0.graphic.check'
+    LOGOUT_FAILED = 'https://iu.zid.tuwien.ac.at/0.graphic.cross'
+    LOGOUT_TIMEOUT = 'https://iu.zid.tuwien.ac.at/0.graphic.watch'
+
     """
     This class is used as the AuthenticationMiddleware on the production server
     """

@@ -20,6 +20,8 @@ from Challenge.models import Challenge
 from Statistics.views import create_stat_data
 from Faq.models import Faq
 
+from AuroraUser.views import sso_login_callback, sso_logout_callback
+
 import logging
 
 logger = logging.getLogger(__name__)
@@ -47,8 +49,10 @@ def course_selection(request):
 
     if not request.user.is_authenticated():
         if 'sKey' in request.GET:
-            from AuroraUser.views import sso_auth_callback
-            return sso_auth_callback(request)
+            return sso_login_callback(request)
+    else:
+        if 'logout' in request.GET:
+            return sso_logout_callback(request)
 
     # automatically redirect the user to its course login page
     # if a next_url is defined.

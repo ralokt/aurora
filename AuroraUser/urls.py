@@ -14,5 +14,5 @@ urlpatterns = patterns('',
                        #url(r'^course/$', 'AuroraUser.views.course'),
                        url(r'^profile/$', views.profile, name='profile'),
                        url(r'^profile/save/$', views.profile_save, name='save'),
-                       url(r'^sso_auth_callback$', 'AuroraUser.views.sso_auth_callback'),
+                       url(r'^sso_auth_callback$', 'AuroraUser.views.sso_login_callback'),
                        )
