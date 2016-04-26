@@ -90,8 +90,8 @@ var draw_all_chapter_badge = function(b) {
         //{'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'blue'},
         //{'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'blue'},
         //bar 1  height rausgeschrieben
-        {'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'url(#gradient)'},
-        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'url(#gradient)'}
+        {'x': 0, 'y': 0, 'widt': 20, 'heig': height, 'skY': 30, 'fill': 'url(#gradient)'},
+        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': height, 'skY': -30, 'fill': 'url(#gradient)'}
     ];
 
     var group1 = svgElement.append('g').attr({
@@ -141,8 +141,8 @@ var draw_handed_in_points_badge = function(b) {
         //{'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'green'},
         //{'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'green'},
         //bar 2
-        {'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'url(#gradient)'},
-        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'url(#gradient)'}
+        {'x': 0, 'y': 0, 'widt': 20, 'heig': height, 'skY': 30, 'fill': 'url(#gradient)'},
+        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': height, 'skY': -30, 'fill': 'url(#gradient)'}
     ];
 
     var group2 = svgElement.append('g').attr({
@@ -212,8 +212,8 @@ var draw_evaluated_points_badge = function(b) {
         //{'x': 0, 'y': 0, 'widt': 20, 'heig': 280, 'skY': 30, 'fill': 'red'},
         //{'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 280, 'skY': -30, 'fill': 'red'},
         //bar 3
-        {'x': 0, 'y': 0, 'widt': 20, 'heig': 220, 'skY': 30, 'fill': 'url(#gradient)'},
-        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 220, 'skY': -30, 'fill': 'url(#gradient)'}
+        {'x': 0, 'y': 0, 'widt': 20, 'heig': height, 'skY': 30, 'fill': 'url(#gradient)'},
+        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': height, 'skY': -30, 'fill': 'url(#gradient)'}
     ];
 
 
