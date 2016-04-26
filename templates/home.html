@@ -11,18 +11,22 @@
     <div id="info_column">
         {% if not user.is_staff %}
 		<div class="sidebar_item">
-            <div class="feed_header"  id="part_0"><i class="fa fa-toggle-down half"></i> <b>Your work</b></div>
+            <div class="feed_header"  id="part_0"><i class="fa   fa-toggle-down half"></i> <b>Your work</b></div>
 			<div class="feed_column"  id="content_part_0">
             	{% include 'points.html' %}
-          		{% include 'public_stats.html' %}
-			</div>
+
+                {#% include 'public_stats.html' %#}
+
 		</div>
 		{% else %}
 		<div class="sidebar_item">
             <div class="feed_header"  id="part_0"><i class="fa fa-toggle-down half"></i> <b>Your work</b></div>
 			<div class="feed_column"  id="content_part_0">
+
+            	{% include 'points.html' %}
             	{% include 'admin_points.html' %}
-				{% include 'public_stats.html' %}
+
+				{#% include 'public_stats.html' %#}
 			</div>
 		</div>
         {% endif %}
@@ -42,7 +46,30 @@
 		<div class="sidebar_item">
 	        <div class="feed_header" id="part_1">
 				<i class="fa fa-toggle-down half"></i> <b>General Information </b>
+		</div>
+
+        <div class="feed_pointsDiagram" id="part_diagram">
+                    {% if not user.is_staff %}
+            <div class="feed_header"  id="part_0"><i class="fa   fa-toggle-down half"></i> <b>Your points</b></div>
+			<div class="feed_column"  id="content_part_0">
+                {% include 'points_diagram.html' %}
+
+                {#% include 'public_stats.html' %#}
+
 			</div>
+		{% else %}
+            <div class="feed_header"  id="part_0"><i class="fa fa-toggle-down half"></i> <b>Your points</b></div>
+			<div class="feed_column"  id="content_part_0">
+
+            	{% include 'points_diagram.html' %}
+                {% include 'admin_points.html' %}
+
+				{#% include 'public_stats.html' %#}
+        {% endif %}
+			</div>
+
+        </div>
+
 	        <div class="feed_column" id="content_part_1">
 				<p><b>Wesentliche Hinweise</b> ...<BR>
 					...zum <a href="http://igw.tuwien.ac.at/aurora/aurora_challenges.pdf">Arbeiten in Aurora</a><br>
@@ -115,7 +142,7 @@
 						<td witdh="2%"></td></tr>
 					<tr><td>April</td>
 						<td></td>
-						<td align="right">5</td>
+                        <td align="right">5</td>
 						<td align="right">12</td>
 						<td align="right">19</td>
 						<td align="right">26</td>
