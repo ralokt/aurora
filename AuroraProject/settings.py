@@ -150,6 +150,7 @@ INSTALLED_APPS = (
     'Faq',
     'djcelery',
     'PlagCheck',
+    'jsonify',
 )
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
