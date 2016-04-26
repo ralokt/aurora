@@ -1,0 +1,29 @@
+{% load staticfiles %}
+{% load jsonify %}
+{% block additional_headers %}
+    <script type="text/javascript" src="{{ STATIC_URL }}js/jquery-2.0.3.js"></script>
+
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/circle.css" type="text/css" media="screen"/>
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/points.css" type="text/css" media="screen"/>
+
+    <script type="text/javascript">
+        {% for c in stacks %}
+            {% if c.course_title == course.title %}
+                var svgData = {{ c.badges|jsonify }}
+                //console.log(svgData)
+            {% endif %}
+        {% endfor %}
+    </script>
+
+{% endblock %}
+
+{% block contents %}
+    <div class="feed-column">
+        <div id="chart">
+
+        </div>
+    </div>
+    <script src="{{ STATIC_URL }}js/pointsDiagram.js"></script>
+{% endblock %}
