@@ -1,4 +1,5 @@
 import os
+import djcelery
 # Django settings for AuroraProject project.
 
 DEBUG = True
@@ -104,6 +105,11 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+#AUTHENTICATION_BACKENDS = (
+#    'django.contrib.auth.backends.ModelBackend',
+#    'middleware.DjangoAuthenticationMiddleware.DjangoAuthenticationMiddleware',
+#)
+
 ROOT_URLCONF = 'AuroraProject.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
@@ -120,6 +126,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
+    'suit',
     'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -139,41 +146,99 @@ INSTALLED_APPS = (
     'Statistics',
     'Notification',
     'endless_pagination',
-    'taggit'
+    'taggit',
+    'Faq',
+    'djcelery',
+    'PlagCheck',
 )
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 SESSION_SERIALIZER = 'django.contrib.sessions.serializers.JSONSerializer'
 
-# A sample logging configuration. The only tangible logging
-# performed by this configuration is to send an email to
-# the site admins on every HTTP 500 error when DEBUG=False.
-# See http://docs.djangoproject.com/en/dev/topics/logging for
-# more details on how to customize your logging configuration.
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'filters': {
         'require_debug_false': {
             '()': 'django.utils.log.RequireDebugFalse'
-        }
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue'
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'timed': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
     },
     'handlers': {
         'mail_admins': {
             'level': 'ERROR',
             'filters': ['require_debug_false'],
             'class': 'django.utils.log.AdminEmailHandler'
-        }
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'maxBytes': 1024*1024*10,
+            'backupCount': 1,
+            'filename': '/tmp/aurora.log',
+            'formatter': 'timed',
+        },
     },
-    'loggers': {
+    'loggers': {} # loggers are set below
+}
+
+# production log handling
+if not DEBUG:
+    LOGGING['loggers'] = {
         'django.request': {
-            'handlers': ['mail_admins'],
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        # django logs
+        'django': {
+            'handlers': ['file', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        # python logs
+        '': {
+            'handlers': ['file'],
+            'level': 'CRITICAL',
+            'propagate': True,
+        },
+    }
+# debug log handling
+else:
+    LOGGING['loggers'] = {
+        'django.request': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        # django logs
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        # python logs
+        '': {
+            'handlers': ['file'],
             'level': 'ERROR',
             'propagate': True,
         },
     }
-}
 
 LOGIN_URL = '/'
 
@@ -198,6 +263,46 @@ ENDLESS_PAGINATION_PREVIOUS_LABEL = (
 ENDLESS_PAGINATION_NEXT_LABEL = (
     '<div class="paginator next">next <i class="fa fa-angle-double-right"></i></div>'
 )
+
+# PlagCheck settings
+
+# a document scanned by PlagCheck needs to have the same or higher similarity percentage
+# than PLAGCHECK_SIMILARITY_THRESHOLD_PERCENT's value to be reported as a possible
+# plagiarism.
+PLAGCHECK_SIMILARITY_THRESHOLD_PERCENT = 50
+
+CELERY_ALWAYS_EAGER=False # set to True by unit tests
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT=['json']
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_ENABLE_UTC = True
+
+CELERY_BROKER_URL = 'amqp://guest:guest@localhost:5672//'
+CELERY_RESULT_BACKEND = 'db+postgresql://user:pass@host/plagcheck-db'
+
+if DEBUG:
+    # The monitors currently doesn't work with the Django broker.
+    #
+    # Means we can't use celerymon/flower monitor the django message broker, instead to properly
+    # monitor and debug events we need to use RabbitMQ message broker locally.
+    #
+    # Enable USE_DJANGO_BROKER to entirely run PlagCheck inside django, without RabbitMQ.
+    #
+    # http://stackoverflow.com/questions/5449163/django-celery-admin-interface-showing-zero-tasks-workers
+
+    USE_DJANGO_BROKER = False
+
+    if USE_DJANGO_BROKER is True:
+        CELERY_BROKER_BACKEND = "django"
+        CELERY_BROKER_URL = 'django://'
+
+    # kombu is used to use djangos database as message broker while debugging
+    INSTALLED_APPS += ('kombu.transport.django',)
+
+    djcelery.setup_loader()
+
+    CELERY_RESULT_BACKEND='djcelery.backends.database:DatabaseBackend'
 
 try:
     from local_settings import *

@@ -14,8 +14,8 @@
 	color:lightgray !important;
 }
 
-#tinymce p { 
-	font-family: Helvetica Neue, Arial, sans-serif !important; 
+#tinymce p {
+	font-family: Helvetica Neue, Arial, sans-serif !important;
 	font-size:13px;
 }
 
@@ -70,13 +70,24 @@
 	padding:8px;
 }
 
+.evaluation_header {
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	width:920px;
+	margin:10px 10px 0 10px;
+	background-color: rgb(229, 235, 253);
+	border-bottom:1px solid silver;
+	padding:3px;
+}
+
 .evaluation_text {
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
-	width:940px;
-	padding:16px;
-	background-color:#eee;
-	border:1px solid silver;
+	width:920px;
+	padding:3px;
+	margin:10px;
+	margin-top:0;
+	background-color: rgb(245, 247, 252);
 }
 
 .qa_section {
@@ -97,17 +108,35 @@
 
 .submission_text {
 	background:rgb(58,201,88);
-	padding:16px 16px 32px 16px;
+	padding:16px 16px 50px 16px;
 	color:white;
 	border-radius:3px;
 	margin-top:3px;
 }
 
-.real_submit {
-	margin-top:10px;
+.real_submit{
+	position:relative;
+	left:16px;
+	padding:7px 10px 5px 15px;
+	margin-top:17px;
 	color:white;
 	background:none;
 	border:1px solid white;
+	border-bottom:none;
+	border-right:none;
+	border-radius:0;
+}
+
+.real_submit:hover {
+    text-shadow: 0px 0px 5px rgba(255,255,255,0.8)!important;
+}
+
+.real_submit:active {
+	background-color:white!important;
+	color:rgb(58,201,88)!important;
+}
+
+.real_submit_revised {
 }
 
 .challenge {
@@ -126,9 +155,13 @@
 	line-height:140%;
 }
 
+.sideIcon {
+	float:left;
+	color:gray;
+}
+
+
 .stack {
-    padding: 5px 10px 5px 10px;
-	clear:both;
 }
 
 
@@ -146,7 +179,9 @@ h1 {
 }
 
 #detail_area {
-    width: 940px;
+    width: 100%;
+	padding:10px;
+	box-sizing: border-box;
 }
 
 .stack_imgs {
@@ -163,21 +198,20 @@ h1 {
 }
 
 
-.stack_icons {
+.stack_icon {
 	display:inline;
+	float:right;
+	position:relative;
+	top:-15px;
 }
 
-.stack_icon {
-	height:24px;
-	width:24px;
-	border:1px solid gray;
-	border-radius:3px;
-	position:relative;
-	top:4px;
+.stack_icon i {
+	color:gray;
 }
 
 .stack_status {
-	
+	opacity:1!important;
+
 }
 
 .stack_action {
@@ -192,7 +226,7 @@ h1 {
 }
 
 .stack .title {
-    font-size: 1.6em;
+    font-size: 1.4em;
 	z-index:210;
 	position:relative;
 }
@@ -218,12 +252,20 @@ h1 {
 	cursor:pointer;
 	overflow:hidden;
 	margin-bottom:0.5em;
+	width:960px;
 }
 
-.stack {	
-	clear:both;
+.filterbar {
+	height:1em;
+	margin-bottom:1em;
+	background-color:#eee;
+	padding-bottom: 4px;
+	padding-left: 2em;}
+
+.stack {
+    padding: 5px 10px 5px 10px;
+	width:450px;
 	position:relative;
-	padding: 1em;
 	margin-left:1.5em;
 	border-radius:0.5em;
 	cursor:pointer;
@@ -233,6 +275,10 @@ h1 {
 	box-shadow:0px 2px 7px rgba(0,0,0,0.1);
 	border-top:1px solid #e8e8e8;
 	border-top:1px solid #e8e8e8;
+}
+
+.forbiddenfruit div {
+	opacity:0.4;
 }
 
 .finished {
@@ -272,7 +318,7 @@ h1 {
 	filter:alpha(opacity=20); /* For IE8 and earlier */
 }
 
-.review_box.done {	
+.review_box.done {
 /*	background-color:rgb(251, 249, 149);*/
 }
 
@@ -301,7 +347,7 @@ h1 {
 .fig {
     margin-top:5px;
 	font-size:80%;
-    text-align: center;
+    text-align: center!important;
 }
 
 
@@ -315,3 +361,72 @@ h1 {
 .history_headline {
 
 }
+
+.hidden_text {
+	position: absolute;
+	right:0px;
+	top:4px;
+	color:gray;
+	text-transform:uppercase;
+	display:none;
+}
+
+.status_under_MCE {
+	position:relative;
+	width:530px;
+	float:left;
+}
+
+.all_reviews {
+	
+}
+
+.show_review {
+	background-color:#eee;
+	padding:1em;
+	margin-bottom:1em;
+}
+
+.show_review_verdict {
+	margin-bottom:0.5em;
+}
+
+
+
+.create_revision_text {
+	color:gray;
+	margin-top:1em;
+	padding:0.5em;
+}
+
+.create_revision_link {
+	margin-bottom: 1em ;
+}
+
+.revision_section{
+	display:none;
+	margin-bottom:4em;
+	margin-top:2em;
+	clear:both;
+}
+
+.changelog {
+	margin-top:1em;
+}
+
+.changelog input[type=text] {
+	width:100%;
+	text-align:top;
+}
+
+.lb-download {
+	color:white;
+}
+
+.chapter {
+	border-bottom:1px 
+	solid silver;
+	margin-bottom:3px;
+	width:410px;
+}
+

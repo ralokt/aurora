@@ -6,6 +6,11 @@ var loadMore_Timer;
 
 $(function() {
 	loadMore_Timer = setTimeout(function(){clickLoadMore()},1000);
+	 if ($(window).width() > 960) {$('#info_column').width($(window).width() - 660)};
+	 $('#info_column').masonry({itemSelector:'.sidebar_item',columWidth:330,gutter:14})
+	 $(window).resize(function() {
+		 if ($(window).width() > 960) {$('#info_column').width($(window).width() - 660)};
+	 })
 })
 
 function clickLoadMore() {
@@ -33,7 +38,8 @@ $(function() {
 	$('#feed-li').addClass('uRhere');
 	window.document.title="Aurora: Newsfeed"
 	$('.feed_header').click(function(){
-		$('#content_'+$(this).attr('id')).slideToggle('fast');
+		$('#content_'+$(this).attr('id')).slideToggle('fast',function(){$('#info_column').masonry('layout');});
+		
 	})
 });
 

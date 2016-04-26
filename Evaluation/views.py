@@ -1,5 +1,5 @@
 from datetime import datetime
-from difflib import SequenceMatcher
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 import difflib
 import json
 from django.contrib.contenttypes.models import ContentType
@@ -8,7 +8,6 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
@@ -17,6 +16,8 @@ from taggit.models import TaggedItem
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden
 
+
+from AuroraProject.decorators import aurora_login_required
 from Challenge.models import Challenge
 from Course.models import Course, CourseUserRelation
 from Elaboration.models import Elaboration
@@ -27,9 +28,15 @@ from ReviewAnswer.models import ReviewAnswer
 from ReviewQuestion.models import ReviewQuestion
 from Stack.models import Stack
 from Notification.models import Notification
+from PlagCheck.models import Suspect, Result, Reference, SuspectState, SuspectFilter
+from django.core.exceptions import SuspiciousOperation, ObjectDoesNotExist
+from django.db import IntegrityError
+from django.shortcuts import redirect
 
+# TODO: Use same pagination for all views, see django pagination class
+# TODO: Why are there mostly 2 templates processed for each view?
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def evaluation(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -84,7 +91,7 @@ def evaluation(request, course_short_title=None):
                               context_instance=RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def missing_reviews(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -112,7 +119,7 @@ def missing_reviews(request, course_short_title=None):
                               context_instance=RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def non_adequate_work(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -140,7 +147,7 @@ def non_adequate_work(request, course_short_title=None):
                               context_instance=RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def top_level_tasks(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -168,7 +175,7 @@ def top_level_tasks(request, course_short_title=None):
                               context_instance=RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def complaints(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -193,7 +200,7 @@ def complaints(request, course_short_title=None):
                               context_instance=RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def awesome(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -229,7 +236,7 @@ def awesome(request, course_short_title=None):
                               context_instance=RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def questions(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -256,7 +263,7 @@ def questions(request, course_short_title=None):
                               context_instance=RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def detail(request, course_short_title=None):
 
@@ -326,13 +333,19 @@ def detail(request, course_short_title=None):
     reviews = Review.objects.filter(elaboration=elaboration, submission_time__isnull=False)
 
     next = prev = None
-    index = elaborations.index(elaboration)
-    if index + 1 < len(elaborations):
-        next = elaborations[index + 1].id
-    if not index == 0:
-        prev = elaborations[index - 1].id
-    count_next = len(elaborations) - index - 1
-    count_prev = index
+
+    try:
+        index = elaborations.index(elaboration)
+        if index + 1 < len(elaborations):
+            next = elaborations[index + 1].id
+        if not index == 0:
+            prev = elaborations[index - 1].id
+        count_next = len(elaborations) - index - 1
+        count_prev = index
+    except ValueError:
+        index = 0
+        count_next = 0
+        count_prev = 0
 
     stack_elaborations = elaboration.user.get_stack_elaborations(elaboration.challenge.get_stack())
     # sort stack_elaborations by submission time
@@ -358,7 +371,7 @@ def detail(request, course_short_title=None):
 
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def start_evaluation(request, course_short_title=None):
     if not 'elaboration_id' in request.GET:
@@ -390,7 +403,7 @@ def start_evaluation(request, course_short_title=None):
     return HttpResponse(state)
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def stack(request, course_short_title=None):
     elaboration = Elaboration.objects.get(pk=request.session.get('elaboration_id', ''))
@@ -399,7 +412,7 @@ def stack(request, course_short_title=None):
     return render_to_response('tasks.html', {'stack_elaborations': stack_elaborations}, RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def others(request, course_short_title=None):
     # get selected elaborations from session
@@ -432,7 +445,7 @@ def others(request, course_short_title=None):
                               RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def challenge_txt(request, course_short_title=None):
     elaboration = Elaboration.objects.get(pk=request.session.get('elaboration_id', ''))
@@ -441,30 +454,36 @@ def challenge_txt(request, course_short_title=None):
                               RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def similarities(request, course_short_title=None):
-    elaboration = Elaboration.objects.get(pk=request.session.get('elaboration_id', ''))
-    challenge_elaborations = Elaboration.objects.filter(challenge=elaboration.challenge,
-                                                        submission_time__isnull=False).exclude(pk=elaboration.id)
 
-    similarities = []
-    if elaboration.elaboration_text:
-        for challenge_elaboration in challenge_elaborations:
-            if challenge_elaboration.elaboration_text:
-                similarity = {}
-                s = SequenceMatcher(lambda x: x == " ",
-                                    elaboration.elaboration_text,
-                                    challenge_elaboration.elaboration_text)
+    # elaboration = Elaboration.objects.get(pk=request.session.get('elaboration_id', ''))
+    # challenge_elaborations = Elaboration.objects.filter(challenge=elaboration.challenge,
+    #                                                     submission_time__isnull=False).exclude(pk=elaboration.id)
 
-                if (s.ratio() > 0.5):
-                    similarity['elaboration'] = challenge_elaboration
-                    similarity['table'] = difflib.HtmlDiff().make_table(elaboration.elaboration_text.splitlines(),
-                                                                        challenge_elaboration.elaboration_text.splitlines())
-                    similarities.append(similarity)
+    suspected = Suspect.objects.all()
 
-    return render_to_response('similarities.html', {'similarities': similarities}, RequestContext(request))
+    similarities = list()
+    for suspect in suspected:
+        doc = Elaboration.objects.all().get(pk=suspect.doc_id)
+        similar_to = Elaboration.objects.all().get(pk=suspect.similar_to_id)
 
+
+        similarity = dict()
+        similarity['elaboration'] = Elaboration.objects.all().get(pk=suspect.doc_id)
+        similarity['table'] = difflib.HtmlDiff().make_table(doc.elaboration_text.splitlines(),
+                                                            similar_to.elaboration_text.splitlines())
+        similarities.append(similarity)
+
+    return render_to_response('plagcheck_compare.html', {'similarities': similarities}, RequestContext(request))
+
+@aurora_login_required()
+@staff_member_required
+def user_detail(request, course_short_title=None):
+    user = Elaboration.objects.get(pk=request.session.get('elaboration_id', '')).user
+    display_points = request.session.get('display_points', 'error')
+    return render_to_response('user.html', {'user': user, 'course_short_title': course_short_title}, RequestContext(request))
 
 @csrf_exempt
 @staff_member_required
@@ -561,7 +580,7 @@ def set_appraisal(request, course_short_title=None):
 
 
 @csrf_exempt
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def search(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -609,7 +628,7 @@ def search(request, course_short_title=None):
     return evaluation(request, course_short_title)
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def autocomplete_challenge(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -621,7 +640,7 @@ def autocomplete_challenge(request, course_short_title=None):
     return HttpResponse(response_data, content_type='application/json; charset=utf-8')
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def autocomplete_user(request, course_short_title=None):
     term = request.GET.get('term', '')
@@ -633,11 +652,15 @@ def autocomplete_user(request, course_short_title=None):
     return HttpResponse(response_data, content_type='application/json; charset=utf-8')
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def autocomplete_tag(request, course_short_title=None):
     term = request.GET.get('term', '')
-    tags = AuroraUser.tags.all().filter(
+    content_type_id = request.GET['content_type_id']
+
+    content_type = ContentType.objects.get_for_id(content_type_id)
+    taggable_model = content_type.model_class()
+    tags = taggable_model.tags.all().filter(
         Q(name__istartswith=term)
     )
     names = [tag.name for tag in tags]
@@ -645,7 +668,7 @@ def autocomplete_tag(request, course_short_title=None):
     return HttpResponse(response_data, content_type='application/json; charset=utf-8')
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def load_reviews(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -658,10 +681,24 @@ def load_reviews(request, course_short_title=None):
     return render_to_response('task.html', {'elaboration': elaboration, 'reviews': reviews, 'stack': 'stack', 'course':course},
                               RequestContext(request))
 
+@aurora_login_required()
+@staff_member_required
+def load_task(request, course_short_title=None):
+    print('here')
+    course = Course.get_or_raise_404(short_title=course_short_title)
+    if not 'elaboration_id' in request.GET:
+        return False;
+
+    elaboration = Elaboration.objects.get(pk=request.GET.get('elaboration_id', ''))
+    stack_elaborations = elaboration.user.get_stack_elaborations(elaboration.challenge.get_stack())
+    reviews = Review.objects.filter(elaboration=elaboration, submission_time__isnull=False)
+
+    return render_to_response('task_s.html', {'stack_elaborations':stack_elaborations, 'elaboration': elaboration, 'reviews': reviews, 'stack': 'stack', 'course':course},
+                              RequestContext(request))
 
 @require_POST
 @csrf_exempt
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def review_answer(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -703,7 +740,7 @@ def review_answer(request, course_short_title=None):
     return HttpResponse(evaluation_url)
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def back(request, course_short_title=None):
     selection = request.session.get('selection', 'error')
@@ -734,7 +771,7 @@ def back(request, course_short_title=None):
     return evaluation(request, course_short_title)
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def reviewlist(request, course_short_title=None):
     elaboration = Elaboration.objects.get(pk=request.session.get('elaboration_id', ''))
@@ -744,7 +781,7 @@ def reviewlist(request, course_short_title=None):
     return render_to_response('reviewlist.html', {'reviews': reviews}, RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 @staff_member_required
 def search_user(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -765,7 +802,8 @@ def search_user(request, course_short_title=None):
     return evaluation(request, course_short_title)
 
 
-@login_required()
+# TODO: Do we really want to submit the users current list to server and then sort it there?
+@aurora_login_required()
 @staff_member_required
 def sort(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
@@ -803,7 +841,7 @@ def sort(request, course_short_title=None):
     return HttpResponse(json.dumps(data))
 
 
-@login_required()
+@aurora_login_required()
 def get_points(request, user, course):
     is_correct_user_request = RequestContext(request)['user'].id == user.id
     is_staff_request = RequestContext(request)['user'].is_staff
@@ -873,20 +911,119 @@ def get_points(request, user, course):
 @staff_member_required
 def add_tags(request, course_short_title=None):
     text = request.POST['text']
-    user_id = request.POST['user_id']
+    object_id = request.POST['object_id']
+    content_type_id = request.POST['content_type_id']
 
-    user = AuroraUser.objects.get(pk=user_id)
-    user.add_tags_from_text(text)
+    content_type = ContentType.objects.get_for_id(content_type_id)
+    taggable_object = content_type.get_object_for_this_type(pk=object_id)
+    taggable_object.add_tags_from_text(text)
 
-    return render_to_response('tags.html', {'tagged_user': user}, context_instance=RequestContext(request))
+    return render_to_response('tags.html', {'tagged_object': taggable_object}, context_instance=RequestContext(request))
 
 @csrf_exempt
 @staff_member_required
 def remove_tag(request, course_short_title=None):
     tag = request.POST['tag']
-    user_id = request.POST['user_id']
+    object_id = request.POST['object_id']
+    content_type_id = request.POST['content_type_id']
 
-    user = AuroraUser.objects.get(pk=user_id)
-    user.remove_tag(tag)
+    content_type = ContentType.objects.get_for_id(content_type_id)
+    taggable_object = content_type.get_object_for_this_type(pk=object_id)
+    taggable_object.remove_tag(tag)
 
-    return render_to_response('tags.html', {'tagged_user': user}, context_instance=RequestContext(request))
+    return render_to_response('tags.html', {'tagged_object': taggable_object}, context_instance=RequestContext(request))
+
+
+@csrf_exempt
+@staff_member_required
+def plagcheck_suspects(request, course_short_title=None):
+    course = Course.get_or_raise_404(short_title=course_short_title)
+
+    show_filtered = int(request.GET.get('show_filtered', 0))
+    if show_filtered is 1:
+        suspect_list = Suspect.objects.all()
+    else:
+        suspect_list = Suspect.objects.exclude(state=SuspectState.AUTO_FILTERED.value)
+
+    # pagination
+    paginator = Paginator(suspect_list, 25)
+    page = request.GET.get('page')
+    try:
+        suspects = paginator.page(page)
+    except PageNotAnInteger:
+        suspects = paginator.page(1)
+    except EmptyPage:
+        suspects = paginator.page(paginator.num_pages)
+
+    # number of suspected documents
+    suspects_count = Suspect.objects.filter(state=SuspectState.SUSPECTED.value).count()
+
+    context = {
+        'course': course,
+        'suspects': suspects,
+        'suspect_states': SuspectState.choices(),
+        'suspects_count': suspects_count,
+        'show_filtered': show_filtered,
+    }
+
+    return render_to_response('evaluation.html', {
+            'overview': render_to_string('plagcheck_suspects.html', context, RequestContext(request)),
+            'course': course,
+            'stabilosiert_plagcheck_suspects': 'stabilosiert',
+            'count_plagcheck_suspects': suspects_count,
+        },
+        context_instance=RequestContext(request))
+
+
+@csrf_exempt
+@staff_member_required
+def plagcheck_compare(request, course_short_title=None, suspect_id=None):
+    course = Course.get_or_raise_404(short_title=course_short_title)
+
+    suspect = Suspect.objects.get(pk=suspect_id)
+
+    docA = Elaboration.objects.get(pk=suspect.doc_id)
+    docB = Elaboration.objects.get(pk=suspect.similar_to_id)
+
+    table = difflib.HtmlDiff(wrapcolumn=70).make_table(docA.elaboration_text.splitlines(),
+                                                        docB.elaboration_text.splitlines())
+
+    show_filtered = int(request.GET.get('show_filtered', 0))
+    (prev_suspect_id, next_suspect_id) = suspect.get_prev_next(show_filtered)
+
+    context = {
+        'course': course,
+        'diff_table': table,
+        'suspect': suspect,
+        'suspect_states': SuspectState.states(),
+        'next_suspect_id': next_suspect_id,
+        'prev_suspect_id': prev_suspect_id,
+    }
+
+    # number of suspected documents
+    suspects_count = Suspect.objects.filter(state=SuspectState.SUSPECTED.value).count()
+
+    return render_to_response('evaluation.html', {
+            'overview': render_to_string('plagcheck_compare.html', context, RequestContext(request)),
+            'course': course,
+            'stabilosiert_plagcheck_suspects': 'stabilosiert',
+            'count_plagcheck_suspects': suspects_count,
+        },
+        context_instance=RequestContext(request))
+
+
+@csrf_exempt
+@staff_member_required
+@require_POST
+def plagcheck_compare_save_state(request, course_short_title=None, suspect_id=None):
+    suspect = Suspect.objects.get(pk=suspect_id)
+
+    new_state = request.POST.get('suspect_state_selection', None)
+
+    suspect.state_enum = new_state
+
+    suspect.save()
+
+    SuspectFilter.update_filter(suspect)
+
+    return redirect('Evaluation:plagcheck_compare', course_short_title=course_short_title, suspect_id=suspect_id)

@@ -2,6 +2,7 @@ from datetime import datetime, timedelta
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.db.models import Count, Min
+from django.contrib.contenttypes.models import ContentType
 
 from Comments.models import Comment
 from Evaluation.models import Evaluation
@@ -10,6 +11,7 @@ from FileUpload.models import UploadFile
 from ReviewAnswer.models import ReviewAnswer
 from collections import Counter
 from taggit.managers import TaggableManager
+from pprint import pprint
 
 
 class Elaboration(models.Model):
@@ -17,11 +19,14 @@ class Elaboration(models.Model):
     user = models.ForeignKey('AuroraUser.AuroraUser')
     creation_time = models.DateTimeField(auto_now_add=True)
     elaboration_text = models.TextField(default='')
+    revised_elaboration_text = models.TextField(default='')
+    revised_elaboration_changelog = models.TextField(default='')
+    most_helpful_other_user = models.IntegerField(null=True)
     submission_time = models.DateTimeField(null=True)
     tags = TaggableManager()
     comments = GenericRelation(Comment)
 
-    def __unicode__(self):
+    def __str__(self):
         return str(self.id)
 
     def is_started(self):
@@ -49,8 +54,28 @@ class Elaboration(models.Model):
             return evaluation[0]
         return None
 
+    def number_of_reviews(self):
+        return Review.objects.filter(elaboration=self, submission_time__isnull=False).count()
+
+    def number_of_reviews_with_feedback(self):
+        count = 0
+        for review in Review.objects.filter(elaboration=self, submission_time__isnull=False):
+            if review.is_evaluated():
+                count += 1
+        return count
+
     def is_reviewed_2times(self):
-        if Review.objects.filter(elaboration=self, submission_time__isnull=False).count() < 2:
+        if self.number_of_reviews() < 2:
+            return False
+        return True
+
+    def is_reviewed_3times(self):
+        if self.number_of_reviews() < 3:
+            return False
+        return True
+
+    def is_reviewed_1times(self):
+        if self.number_of_reviews() < 1:
             return False
         return True
 
@@ -74,6 +99,38 @@ class Elaboration(models.Model):
             .exclude(pk=self.id)
         )
         return elaborations
+
+    def can_be_revised(self):
+        if self.is_evaluated():
+            return False
+
+        if not self.is_reviewed_1times():
+            return False
+
+        final_challenge = self.challenge.get_final_challenge()
+        if not final_challenge:
+            return False
+
+        final_challenge_elaboration = final_challenge.get_elaboration(self.user)
+        if final_challenge_elaboration and final_challenge_elaboration.is_submitted():
+            return False
+
+        return True
+
+    def has_revision(self):
+        if self.elaboration_text != self.revised_elaboration_text or self.revised_elaboration_changelog:
+            return True
+
+    def get_content_type_id(self):
+        return ContentType.objects.get_for_model(self).id
+
+    def add_tags_from_text(self, text):
+        tags = text.split(',');
+        tags = [tag.lower().strip() for tag in tags]
+        self.tags.add(*tags)
+
+    def remove_tag(self, tag):
+        self.tags.remove(tag)
 
     @staticmethod
     def get_sel_challenge_elaborations(challenge):
@@ -152,6 +209,7 @@ class Elaboration(models.Model):
             .prefetch_related('elaboration')
             .values_list('elaboration__id', flat=True)
         )
+
         non_adequate_elaborations = (
             Elaboration.objects
             .filter(id__in=nothing_reviews, submission_time__isnull=False, user__is_staff=False,
@@ -192,7 +250,6 @@ class Elaboration(models.Model):
                 .filter(challenge__stackchallengerelation__stack__id=stack, user_id__in=users)
                 .values_list('id', flat=True)
             )
-
         return non_adequate_elaborations.exclude(id__in=exclude_elaboration_ids)
 
     @staticmethod
@@ -263,6 +320,9 @@ class Elaboration(models.Model):
 
     def get_awesome_reviews(self):
         return Review.objects.filter(elaboration=self, submission_time__isnull=False, appraisal=Review.AWESOME)
+
+    def get_reviews(self):
+        return Review.objects.filter(elaboration=self, submission_time__isnull=False).order_by("appraisal")
 
     def get_lva_team_notes(self):
         reviews = (

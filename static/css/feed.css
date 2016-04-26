@@ -7,8 +7,7 @@
 	box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	
-	border-bottom:1px solid black;
-	color:white;
+	border-bottom:1px solid #3F6E34;
 	padding:0.2em 0.5em;
 	border-radius: 4px 4px 1px 1px;
 	cursor:pointer;
@@ -33,21 +32,28 @@
 	margin-top:2em;
 }
 
-@media all and (min-width: 961px) {
+@media all and (min-width: 966px) {
 	#info_column {
 		float:left;
-		width:330px;
 		margin-top:2em;
 		margin-left:1em;
 	}
+	
+	.sidebar_item {
+		width:330px;
+	}
 }
 
-@media all and (max-width: 961px) {
+@media all and (max-width: 965px) {
 	#info_column {
 		float:left;
 		width:580px;
 		margin-top:1em;
 		margin-left:1em;
+	}
+	
+	.sidebar_item {
+		width:580px;
 	}
 }
 
@@ -113,3 +119,4 @@
 .comment_seen {display:none;}
 .seen_link {display:none;}
 .mark_seen_link {display:none;}
+

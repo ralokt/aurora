@@ -1,12 +1,14 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.shortcuts import redirect
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from datetime import datetime
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
+from AuroraProject.decorators import aurora_login_required
 from Course.models import Course
 from AuroraUser.models import AuroraUser
 from Evaluation.models import Evaluation
@@ -16,27 +18,56 @@ from Elaboration.models import Elaboration
 from Evaluation.views import get_points
 from Challenge.models import Challenge
 from Statistics.views import create_stat_data
+from Faq.models import Faq
+
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def course_from_next_url(next):
+    course = None
+    try:
+        course = next.split('/')[1]
+    except IndexError:
+        pass
+    finally:
+        return course
 
 
 def course_selection(request):
+
+    # store next_url if available inside the session
+    next_url = None
+    if 'next' in request.GET:
+        next_url = request.GET['next']
+
+    if next_url:
+        request.session['next_url'] = next_url
+
     if not request.user.is_authenticated():
         if 'sKey' in request.GET:
             from AuroraUser.views import sso_auth_callback
             return sso_auth_callback(request)
 
-    data = {'courses': Course.objects.all()}
+    # automatically redirect the user to its course login page
+    # if a next_url is defined.
+    course = course_from_next_url(next_url)
+    if next_url and course:
+        return redirect(reverse("User:login", args=(course, )))
+
+    data = {'courses': Course.objects.all(), 'next': next_url, 'debug': settings.DEBUG}
     return render_to_response('course_selection.html', data)
 
-
+@aurora_login_required()
 def home(request, course_short_title=None):
-    if not request.user.is_authenticated():
-        return redirect(reverse('User:login', args=(course_short_title, )))
 
     user = RequestContext(request)['user']
     course = Course.get_or_raise_404(course_short_title)
     data = get_points(request, user, course)
     data = create_stat_data(course,data)
-    context = RequestContext(request, {'newsfeed': data['course']})
+    faq_list = Faq.get_faqs(course_short_title)
+    context = RequestContext(request, {'newsfeed': data['course'], 'faq_list': faq_list})
 
     return render_to_response('home.html', data, context)
 

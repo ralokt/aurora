@@ -3,9 +3,9 @@ from datetime import datetime
 from random import randint
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, Http404
 
+from AuroraProject.decorators import aurora_login_required
 from Course.models import Course
 from Review.models import Review, ReviewEvaluation
 from Elaboration.models import Elaboration
@@ -14,6 +14,9 @@ from ReviewQuestion.models import ReviewQuestion
 from ReviewAnswer.models import ReviewAnswer
 from Notification.models import Notification
 from Review.models import ReviewConfig
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 def create_context_review(request):
@@ -44,14 +47,14 @@ def create_context_review(request):
     return data
 
 
-@login_required()
+@aurora_login_required()
 def review(request, course_short_title):
     data = create_context_review(request)
     data['course'] = Course.get_or_raise_404(course_short_title)
     return render_to_response('review.html', data, context_instance=RequestContext(request))
 
 
-@login_required()
+@aurora_login_required()
 def review_answer(request, course_short_title):
     user = RequestContext(request)['user']
     if request.POST:
@@ -74,6 +77,20 @@ def review_answer(request, course_short_title):
             question_id = answer['question_id']
             text = answer['answer']
             review_question = ReviewQuestion.objects.get(pk=question_id)
+
+            # check if this answer has already been posted
+            # submit button could have been pressed twice
+            # there is no other way to check for this, because the parent
+            # review object gets created when creating the review view
+            # so we can't check it here because it would already exist.
+            # get_or_create() would work here, but notifications would be sent in both cases
+            if ReviewAnswer.objects.filter(review=review, review_question=review_question).exists():
+
+                # log this incident so we can trace it down to the client. Is it IE?
+                logger.error("We prevented a review to be submitted twice. Report this with client details.")
+                logger.error("review_id=%i, user_id=%i, question_id=%i, review_question_id=%i" % review.id, user.id, question_id, review_question.id)
+                raise Http404
+
             ReviewAnswer(review=review, review_question=review_question, text=text).save()
             # send notifications
         review.submission_time = datetime.now()
@@ -88,7 +105,7 @@ def review_answer(request, course_short_title):
 
     return HttpResponse()
 
-@login_required()
+@aurora_login_required()
 def evaluate(request, course_short_title):
     user = RequestContext(request)['user']
     if not request.GET:

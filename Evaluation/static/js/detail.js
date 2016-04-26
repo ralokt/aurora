@@ -16,6 +16,18 @@ $(function() {
 		height:400,
 		readonly: 1
     });
+
+    tinymce.init({
+        // selector: "textarea#editor",
+		plugins: "wordcount",
+		mode : "exact",
+		elements :"revised_editor_detail",
+		menubar: false,
+		statusbar: true,
+		toolbar: false,
+		height:400,
+		readonly: 1
+    });
 });
 
 $(function() {
@@ -54,6 +66,15 @@ $(function() {
 $(function() {
    $(".similarities").click(function(event) {
        var url = './similarities';
+        $.get(url, function (data) {
+            $('#info_area').html(data);
+        });
+   });
+});
+
+$(function() {
+   $(".user-detail").click(function(event) {
+       var url = './user-detail';
         $.get(url, function (data) {
             $('#info_area').html(data);
         });
@@ -178,6 +199,14 @@ function AutoSave(elaboration_id) {
 
 function load_reviews(elaboration_id) {
    var url = './load_reviews?elaboration_id=' + elaboration_id;
+   $.get(url, function (data) {
+       $('#info_area').html(data);
+   });
+}
+
+
+function load_task(elaboration_id) {
+   var url = './load_task?elaboration_id=' + elaboration_id;
    $.get(url, function (data) {
        $('#info_area').html(data);
    });

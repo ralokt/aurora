@@ -1,196 +1,171 @@
 {% extends "base.html" %}
 
+{% block additional_headers %}
+  <script type="text/javascript" src="{{ STATIC_URL }}js/masonry.pkgd.min.js"></script>
+{% endblock %}
+
+
 {% block content %}
     {% include 'feed.html' %}
 
     <div id="info_column">
         {% if not user.is_staff %}
+		<div class="sidebar_item">
             <div class="feed_header"  id="part_0"><i class="fa fa-toggle-down half"></i> <b>Your work</b></div>
 			<div class="feed_column"  id="content_part_0">
             	{% include 'points.html' %}
           		{% include 'public_stats.html' %}
 			</div>
+		</div>
 		{% else %}
+		<div class="sidebar_item">
             <div class="feed_header"  id="part_0"><i class="fa fa-toggle-down half"></i> <b>Your work</b></div>
 			<div class="feed_column"  id="content_part_0">
             	{% include 'admin_points.html' %}
 				{% include 'public_stats.html' %}
 			</div>
+		</div>
         {% endif %}
 
 		{% if user.is_staff %}
-        <div class="feed_header" id="part_X">
-			<i class="fa fa-toggle-down half"></i> <b>LVA-Team Ressources </b>
-		</div>
-        <div class="feed_column" id="content_part_X">
-			<p><i style="color:gray" class="fa fa-arrow-right"></i> <a target="_blank" href="https://auri1-gsi.pbworks.com/w/page/77253689/FrontPage">Aurora Wiki</a><br>
-			<i style="color:gray" class="fa fa-arrow-right"></i> TUWEL <a target="_blank" href="https://tuwel.tuwien.ac.at/course/view.php?id=5575">gsi</a> <a target="_blank" href="https://tuwel.tuwien.ac.at/course/view.php?id=5581">bhci</a><br><br>
-			<i style="color:gray" class="fa fa-arrow-right"></i> <a href="/admin">django admin</a><br>
-			<i style="color:gray" class="fa fa-arrow-right"></i> some <a href="statistics">statistics</a></p><br>
+		<div class="sidebar_item">
+	        <div class="feed_header" id="part_X">
+				<i class="fa fa-toggle-down half"></i> <b>LVA-Team Ressources </b>
+			</div>
+	        <div class="feed_column" id="content_part_X">
+				<p><i style="color:gray" class="fa fa-arrow-right"></i> <a target="_blank" href="https://auri1-gsi.pbworks.com/w/page/77253689/FrontPage">Aurora Wiki</a><br>
+				<i style="color:gray" class="fa fa-arrow-right"></i> TUWEL <a target="_blank" href="https://tuwel.tuwien.ac.at/course/view.php?id=5575">gsi</a> <a target="_blank" href="https://tuwel.tuwien.ac.at/course/view.php?id=5581">bhci</a><br><br>
+				<i style="color:gray" class="fa fa-arrow-right"></i> <a href="/admin">django admin</a><br><br>
+			</div>
 		</div>
 		{%  endif %}
-        <div class="feed_header" id="part_1">
-			<i class="fa fa-toggle-down half"></i> <b>General Information </b>
-		</div>
-        <div class="feed_column" id="content_part_1">
-			<p><b>Wesentliche Hinweise</b> ...<BR>
-				...zum <a href="http://igw.tuwien.ac.at/aurora/aurora_challenges.pdf">Arbeiten in Aurora</a><br>
-			 ...zum <a href="http://igw.tuwien.ac.at/aurora/aurora_reviews.pdf">Schreiben von Reviews</a><br>
-			 ...zu <a href="http://igw.tuwien.ac.at/aurora/plagiatsleitfaden.pdf">Plagiaten</a></p><br>
-	        <p>Hinweis: Diese Seite wird mit Mozilla- und Webkit-Browsern <b>(Firefox, Safari, Chrome)</b> entwickelt und getestet. Bitte verwenden sie Aurora mit einem dieser Browser. F&uuml;r alle anderen Browser &uuml;bernehmen wir keine Garantie. Melden Sie eventuelle Probleme auf unterstützten Browsern gegebenenfalls im &raquo;Bugs&amp;Feedback&laquo;-Bereich.</p><br>
-	       <p>Es gilt folgender <b>Punktespiegel:</b></p>
-	        <p>60 Punkte - sehr gut</p>
-	        <p>53 Punkte - gut</p>
-	        <p>47 Punkte - befriedigend</p>
-	        <p>40 Punkte - gen&uuml;gend</p><br>
-	        <p><b>Achtung:</b> F&uuml;r eine positive Note m&uuml;ssen Challenges im Umfang von 60 Punkten durchgearbeitet werden!</p><br>
-	        <br>
-	        <p><b>Video-Streams:</b></p>
-	        <br>
-	        <p>Die Video-Streams &uuml;bertragen w&auml;hrend der Vorlesungszeit die Vorlesung live: <br><br>
-				{% if course.short_title == "gsi" %}
-				&nbsp;&nbsp;&nbsp;<i class="fa fa-angle-double-right"></i><a href="https://tuwel.tuwien.ac.at/mod/rssplayer/view.php?id=178741">GSI live stream</a></p><br>
-				{% else %}
-				&nbsp;&nbsp;&nbsp;<i class="fa fa-angle-double-right"></i><a href="https://tuwel.tuwien.ac.at/mod/rssplayer/view.php?id=216701">BHCI live stream</a></p><br>
-				{% endif %}
-			<p>Ausserdem zeichnen wir diese Streams auf. Sie finden die Aufzeichnungen in tuwel!</p>
-	        <br><br>
+		<div class="sidebar_item">
+	        <div class="feed_header" id="part_1">
+				<i class="fa fa-toggle-down half"></i> <b>General Information </b>
+			</div>
+	        <div class="feed_column" id="content_part_1">
+				<p><b>Wesentliche Hinweise</b> ...<BR>
+					...zum <a href="http://igw.tuwien.ac.at/aurora/aurora_challenges.pdf">Arbeiten in Aurora</a><br>
+				 ...zum <a href="http://igw.tuwien.ac.at/aurora/aurora_reviews.pdf">Schreiben von Reviews</a><br>
+				 ...zu <a href="http://igw.tuwien.ac.at/aurora/plagiatsleitfaden.pdf">Plagiaten</a></p><br>
+		        <p>Hinweis: Diese Seite wird mit Mozilla- und Webkit-Browsern <b>(Firefox, Safari, Chrome)</b> entwickelt und getestet. Bitte verwenden sie Aurora mit einem dieser Browser. F&uuml;r alle anderen Browser &uuml;bernehmen wir keine Garantie. Melden Sie eventuelle Probleme auf unterstützten Browsern gegebenenfalls im &raquo;Bugs&amp;Feedback&laquo;-Bereich.</p><br>
+		       <p>Es gilt folgender <b>Punktespiegel:</b></p>
+		        <p>60 Punkte - sehr gut</p>
+		        <p>53 Punkte - gut</p>
+		        <p>47 Punkte - befriedigend</p>
+		        <p>40 Punkte - gen&uuml;gend</p><br>
+		        <p><b>Achtung:</b> F&uuml;r eine positive Note m&uuml;ssen Challenges im Umfang von 60 Punkten durchgearbeitet werden!</p><br>
+		        <br>
+		        <p><b>Video-Stream:</b></p>
+		        <br>
+		        <p>Während der Vorlesungszeit steht ein Video-Stream zur Verfügung, mit dem Sie die Vorlesung remote verfolgen können: <br><br>
+					{% if course.short_title == "gsi" %}
+					&nbsp;&nbsp;&nbsp;<i class="fa fa-angle-double-right"></i><a href="https://tuwel.tuwien.ac.at/mod/rssplayer/view.php?id=253610">GSI live stream</a></p><br>
+					{% else %}
+					&nbsp;&nbsp;&nbsp;<i class="fa fa-angle-double-right"></i><a href="https://tuwel.tuwien.ac.at/mod/rssplayer/view.php?id=253611">BHCI live stream</a></p><br>
+					{% endif %}
+				<p>Ausserdem zeichnen wir diese Streams auf; Sie finden die Aufzeichnungen in tuwel. Beachten Sie bitte, dass man dazu physisch oder zumindest logisch (VPN oder so) im Netz der TU sein muss!</p>
+		        <br><br>
 
-	        <p><b>Support:</b></p>
-	        <br>
-			<p>Wenn sie Probleme haben, sich nicht auskennen oder Hilfe ben&ouml;tigen, so stehen ihnen folgende Informationsquellen zur Verf&uuml;gung:</p>
-			<br>
-			<p>- Lesen sie die Sidebar sorgf&auml;tig. Die Informationen hier werden immer wieder aktualisiert.</p>
-			<p>- Wenn sie Fragen zu einem Task haben, dann nutzen sie bitte die M&ouml;glichkeit, bei den Beschreibungen der Tasks mit dem LVA-Team zu diskutieren. </p>
-			<p>- Wenn sie mit einem Review oder einer Bewertung nicht zufrieden sind, dann nutzen sie bitte die dort angegliederten Kommentare, um mit uns dar&uuml;ber zu reden.</p>
-			<p>- Wenn sie eine andere Frage haben, die im allgemeinen Interesse ist, dann posten sie diese hier im Newsfeed.</p>
-			<p>- Sollten sie eine Frage haben, die nur sie betrifft, dann schreiben sie uns bitte eine email:</p><br>
-			{% if course.short_title == "gsi" %}
-	        <p><i><a href="mailto:gsi@igw.tuwien.ac.at">gsi@igw.tuwien.ac.at</a></i></p>
-			{% else %}
-	        <p><i><a href="mailto:bhci@igw.tuwien.ac.at">bhci@igw.tuwien.ac.at</a></i></p>
-			{% endif %}
-	        <br><br>
+		        <p><b>Support:</b></p>
+		        <br>
+				<p>Wenn sie Probleme haben, sich nicht auskennen oder Hilfe ben&ouml;tigen, so stehen ihnen folgende Informationsquellen zur Verf&uuml;gung:</p>
+				<br>
+				<p>- Lesen sie die Sidebar sorgf&auml;tig. Die Informationen hier werden immer wieder aktualisiert.</p>
+				<p>- Wenn sie Fragen zu einem Task haben, dann nutzen sie bitte die M&ouml;glichkeit, bei den Beschreibungen der Tasks mit dem LVA-Team zu diskutieren. </p>
+				<p>- Wenn sie mit einem Review oder einer Bewertung nicht zufrieden sind, dann nutzen sie bitte die dort angegliederten Kommentare, um mit uns dar&uuml;ber zu reden.</p>
+				<p>- Wenn sie eine andere Frage haben, die im allgemeinen Interesse ist, dann posten sie diese hier im Newsfeed.</p>
+				<p>- Sollten sie eine Frage haben, die nur sie betrifft, dann schreiben sie uns bitte eine email:</p><br>
+				{% if course.short_title == "gsi" %}
+		        <p><i><a href="mailto:gsi@igw.tuwien.ac.at">gsi@igw.tuwien.ac.at</a></i></p>
+				{% else %}
+		        <p><i><a href="mailto:bhci@igw.tuwien.ac.at">bhci@igw.tuwien.ac.at</a></i></p>
+				{% endif %}<br>
+				<p>- Sie können auch in die LVA-Sprechstunde kommen: Mi 10-12h, Michael Urbanek, Argentinierstr. 8, 2. Stock, Mitte.
+		        <br><br>
+			</div>
 		</div>
-        <div class="feed_header" id="part_2">
-			<i class="fa fa-toggle-down half"></i> <b>Frequently Asked Questions</b>
+		<div class="sidebar_item">
+	        <div class="feed_header" id="part_2">
+				<i class="fa fa-toggle-down half"></i> <b>Frequently Asked Questions</b>
+			</div>
+	        <div class="feed_column" id="content_part_2">
+	            {% include "faq.html" %}
+			</div>
 		</div>
-        <div class="feed_column" id="content_part_2">
-	        <p><i>Q: Wie unterscheidet sich der Modus zu dem des Vorjahres?</i></p>
-			<p>A: So gut wie gar nicht. Aurora wurde &uuml;berarbeitet, viele Bugs wurden behoben, und es wurden einige kleine Verbesserungen implementiert. Wir haben aber noch Pl&auml;ne, &uuml;ber das Semester hinweg ein paar neue Dinge zu versuchen. </p>
-	        <br>
-			<p><i>Q: Kann ich einfach irgendwelche Challenges machen, bis ich genug Punkte habe?</i></p>
-			<p>A: Nein. Sie <b>m&uuml;ssen</b> f&uuml;r eine positive Note aus jeder der vier Kategorien (s.u.) mindestens eine Challenge absolvieren. Ansonsten steht Ihnen frei, was sie wann machen.</p> 
-			<br>
-			{% if course.short_title == "hci" %}
-			<p><i>Q: Was sind die 4 Kategorien in BHCI?</i></p> 
-			<p>- Kategorie 1: User-centered design + design basics (B1cX)<br>
-			- Kategorie 2: Methoden (B2cX)<br>
-			- Kategorie 3: psycholog. Grundlagen, Evaluation (B3cX)<br>
-			- Kategorie 4: Prototyping, Beyond the desktop (B4cX)<br>
-			</p>
-			<br>
-			{% endif %}
-			{% if course.short_title == "gsi" %}
-			<p><i>Q: Was sind die 4 Kategorien in GSI?</i></p> 
-			<p>- Kategorie 1: Praxis (G1cX)<br>
-			- Kategorie 2: IT-Branche (G2cX)<br>
-			- Kategorie 3: Ideen (G3cX)<br>
-			- Kategorie 4: Gesellschaft (G4cX)<br>
-			</p>
-			<br>
-			{% endif %}
-	        <p><i>Q: Wann ist die Deadline f&uuml;r (eine/diese/alle) Challenges?</i></p>
-	        <p>A: F&uuml;r eine positive Note m&uuml;ssen sie bis Ende des Semesters (Fr 3.7., 23:59) ausreichend Punkte gesammelt haben, und aus jeder Kategorie (s.o.) mindestens eine Challenge geschafft haben. Punkte bekommen sie f&uuml;r fertiggestellte Challenges, aber zB. auch f&uuml;r ausgezeichnete Kommentare bei den Folien.  Beachten sie jedoch, dass sie nach dem Abgeben einer Challenge (also des Final Tasks) 11 Tage warten m&uuml;ssen (ab 22.6.: 7  Tage), bevor sie wieder einen Final Task einreichen können!</p>
-	        <br>
-	        <p><i>Q: Was kann ich machen, wenn die Bewertung meiner Arbeit nicht meinen Erwartungen entspricht?</i></p>
-	        <p>A: Sie k&ouml;nnen einen Kommentar zu ihrer Arbeit formulieren, in dem sie zb. eine Frage stellen, oder ihre
-	            Arbeit noch einmal besser erkl&auml;ren. Damit wird ihre Arbeit intern markiert und f&uuml;r uns noch einmal 
-				sichtbar. Ihr Kommentar wird jedenfalls beantwortet werden, auch wenn es manchmal etwas dauert.</p>
-	        <br>
-	        <p><i>Q: Ab wann werde ich bewertet?</i></p>
-	        <p>A: Sobald sie eine Challenge abgeschlossen haben, wird f&uuml;r sie am Ende des Semesters ein Zeugnis 
-				ausgestellt. </p>
-	        <br>
-	        <p><i>Q: Wie sind die Bewertungskategorien am Ende jedes Reviews zu verstehen?</i></p>
-	        <p>A: Siehe <a href="http://igw.tuwien.ac.at/aurora/aurora_reviews.pdf">Zum Schreiben von Reviews</a></p>
-	        <br>
-	        <p><i>Q: Wie ist das jetzt mit den Punkten?</i></p>
-	        <p>A: <i class="fa fa-arrow-right"></i> Sie <b>m&uuml;ssen</b> Challenges im Umfang von mind. 60 Punkten komplett 
-				abarbeiten. Die Punkte sind bei der Beschreibung 
-				von Challenges explizit angef&uuml;hrt (zB. &raquo;Sie k&ouml;nnen f&uuml;r Ihre Arbeit hier bis zu 10 Punkten 
-				bekommen&laquo;)<br>
-				<i class="fa fa-arrow-right"></i> Wir bewerten eine Challenge, wenn der final Task abgegeben wurde. F&uuml;r 
-				M&auml;ngel bei einzelnen Tasks ziehen wir Punkte vom 
-				erreichbaren Maximum ab, wobei die relative Wertigkeit der Tasks in der Taskbeschreibung in % angegeben ist. Diese Bewertung 
-				erfolgt unabh&auml;ngig von den Review-Ergebnissen, die Sie bekommen haben.<br> 
-				<i class="fa fa-arrow-right"></i> Die Summe der Punkte, die Sie f&uuml;r alle Challenges bekommen, bestimmt Ihre Note nach dem oben angegebenen Notenspiegel.
-			</p>
-	        <br><br>
-		</div>
-        <div class="feed_header" id="part_3">
-			<i class="fa fa-toggle-down half"></i> <b>Lecture dates
-			{% if course.short_title == "hci" %}
-			BHCI
-			{% else %}
-			GSI
-			{% endif %}
-			</b>
-		</div>
-        <div class="feed_column" id="content_part_3">
-			<table width="100%">
-			{% if course.short_title == "hci" %}
-				<tr bgcolor="#EEE"><td width="10%">M&auml;rz</td>
-					<td width="18%">
-					<td width="11%" align="right">10</td>
-					<td width="7%" align="right">11</td>
-					<td width="11%" align="right">17</td>
-					<td width="7%" align="right">18</td>
-					<td width="18%" align="right">24</td></tr>
-				<tr><td>April</td>
-					<td></td>
-					<td colspan=2 align="right">14</td>
-					<td colspan=2 align="right">21</td>
-					<td align="right">28</td></tr>
-				<tr bgcolor="#EEE"><td>Mai</td>
-					<td align="right">5</td>
-					<td colspan=2 align="right">12</td>
-					<td colspan=2 align="right">19</td>
-					<td></td></tr>
-				<tr><td>Juni</td>
-					<td align="right">*2</td>
-					<td colspan=2 align="right">*9</td>
-					<td colspan=2 align="right">*16</td>
-					<td align="right">*23</td></tr>
-			{% else %}
-				<tr bgcolor="#EEE"><td width="10%">M&auml;rz</td>
-					<td width="22%" align="right"></td>
-					<td width="22%" align="right"></td>
-					<td width="22%" align="right"></td>
-					<td width="22%" align="right">25</td>
-					<td witdh="2%"></td></tr>
-				<tr><td>April</td>
-					<td></td>
-					<td align="right">15</td>
-					<td align="right">22</td>
-					<td align="right">29</td>
-					<td witdh="2%"></td></tr>
-				<tr bgcolor="#EEE"><td>Mai</td>
-					<td align="right">6</td>
-					<td align="right">13</td>
-					<td align="right">20</td>
-					<td align="right">27</td>
-					<td witdh="2%"></td></tr>
-				<tr><td>Juni</td>
-					<td align="right">3</td>
-					<td align="right">10</td>
-					<td align="right">*17</td>
-					<td align="right">*24</td>
-					<td witdh="2%"></td></tr>
-			{% endif %}
-			</table>
-			<br>
-			<span class="maybe" style="font-size:90%">* diese termine sind als reserve geplant. nach momentanen planungsstand findet da keine vorlesung statt. </span>
+		<div class="sidebar_item">
+	        <div class="feed_header" id="part_3">
+				<i class="fa fa-toggle-down half"></i> <b>Lecture dates
+				{% if course.short_title == "hci" %}
+				BHCI
+				{% else %}
+				GSI
+				{% endif %}
+				</b>
+			</div>
+	        <div class="feed_column" id="content_part_3">
+				<table width="100%">
+				{% if course.short_title == "hci" %}
+					<tr bgcolor="#EEE"><td width="10%">M&auml;rz</td>
+						<td width="17%" align="right" style="color:silver">1</td>
+						<td width="17%" align="right">8</td>
+						<td width="17%" align="right">15</td>
+						<td width="17%" align="right" style="color:silver">22</td>
+						<td width="18%" align="right" style="color:silver">29</td>
+						<td witdh="2%"></td></tr>
+					<tr><td>April</td>
+						<td></td>
+						<td align="right">5</td>
+						<td align="right">12</td>
+						<td align="right">19</td>
+						<td align="right">26</td>
+						<td witdh="2%"></td></tr>
+					<tr bgcolor="#EEE"><td>Mai</td>
+						<td align="right">3</td>
+						<td align="right">10</td>
+						<td align="right" style="color:silver">17</td>
+						<td align="right">24</td>
+						<td align="right">31</td>
+						<td witdh="2%"></td></tr>
+					<tr><td>Juni</td>
+						<td></td>
+						<td align="right">7</td>
+						<td align="right">14</td>
+						<td align="right" style="color:gray">*21</td>
+						<td align="right" style="color:gray">*28</td>
+						<td witdh="2%"></td></tr>
+				{% else %}
+					<tr bgcolor="#EEE"><td width="10%">M&auml;rz</td>
+						<td width="17%" align="right" style="color:silver">2</td>
+						<td width="17%" align="right">9</td>
+						<td width="17%" align="right">16</td>
+						<td width="17%" align="right" style="color:silver">23</td>
+						<td width="18%" align="right" style="color:silver">30</td></tr>
+					<tr><td>April</td>
+						<td></td>
+						<td align="right">6</td>
+						<td align="right">13</td>
+						<td align="right">20</td>
+						<td align="right">27</td></tr>
+					<tr bgcolor="#EEE"><td>Mai</td>
+						<td></td>
+						<td align="right">4</td>
+						<td align="right">11</td>
+						<td align="right" style="color:silver">18</td>
+						<td align="right">25</td>
+						<td witdh="2%"></td></tr>
+					<tr><td>Juni</td>
+						<td align="right">1</td>
+						<td align="right">8</td>
+						<td align="right" style="color:gray">*15</td>
+						<td align="right" style="color:gray">*22</td>
+						<td align="right" style="color:gray">*29</td>
+						<td witdh="2%"></td></tr>
+				{% endif %}
+				</table>
+				<br>
+				<span class="maybe" style="font-size:90%">* diese termine sind als reserve geplant. nach momentanen planungsstand findet da keine vorlesung statt. </span>
+			</div>
 		</div>
 		<br><br><br><br><br>
     </div>

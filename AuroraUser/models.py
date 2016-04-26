@@ -6,9 +6,13 @@ from urllib.parse import urlparse
 import urllib.request
 from django.db import models
 from django.contrib.auth.models import User, UserManager
+from django.contrib.contenttypes.models import ContentType
 from AuroraProject.settings import STATIC_ROOT, MEDIA_ROOT
 from Elaboration.models import Elaboration
 from django.core.files import File
+from Review.models import Review
+from Course.models import Course, CourseUserRelation
+from Challenge.models import Challenge
 
 def avatar_path(instance, filename):
     name = 'avatar_%s' % instance.id
@@ -31,11 +35,21 @@ class AuroraUser(User):
     # Use UserManager to get the create_user method, etc.
     objects = UserManager()
 
+    def enlisted_and_active_for_course(self, course):
+        try:
+            CourseUserRelation.objects.get(user=self, course=course, active=True)
+            return True
+        except CourseUserRelation.DoesNotExist:
+            return False
+
     def get_elaborations(self):
         elaborations = []
         for elaboration in Elaboration.objects.filter(user=self, submission_time__isnull=False):
             elaborations.append(elaboration)
         return elaborations
+
+    def get_reviews(self):
+        return Review.objects.filter(reviewer=self)
 
     def get_course_elaborations(self, course):
         elaborations = []
@@ -66,9 +80,12 @@ class AuroraUser(User):
             self.avatar.save(avatar_path(self, ''), File(open(result[0], 'rb')))
         except IOError:
             from shutil import copyfile
-            copyfile(os.path.join(STATIC_ROOT, 'img', 'default_gravatar.png'), os.path.join(self.upload_path, filename))
+            copyfile(os.path.join(STATIC_ROOT, 'img', 'default_gravatar.png'), os.path.join(MEDIA_ROOT, avatar_path(self, '')))
         self.avatar = os.path.join(self.upload_path, filename)
         self.save()
+
+    def get_content_type_id(self):
+        return ContentType.objects.get_for_model(self).id
 
     def add_tags_from_text(self, text):
         tags = text.split(',');

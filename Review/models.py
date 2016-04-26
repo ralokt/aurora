@@ -1,11 +1,13 @@
 from django.db import models
-
+from taggit.managers import TaggableManager
+from django.contrib.contenttypes.models import ContentType
 
 class Review(models.Model):
     elaboration = models.ForeignKey('Elaboration.Elaboration')
     creation_time = models.DateTimeField(auto_now_add=True)
     submission_time = models.DateTimeField(null=True)
     reviewer = models.ForeignKey('AuroraUser.AuroraUser')
+    tags = TaggableManager()
 
     NOTHING = 'N'
     FAIL = 'F'
@@ -21,6 +23,21 @@ class Review(models.Model):
 
     def __unicode__(self):
         return str(self.id)
+
+
+    def is_evaluated(self):
+        return ReviewEvaluation.objects.filter(review=self).count() > 0
+
+    def get_content_type_id(self):
+        return ContentType.objects.get_for_model(self).id
+
+    def add_tags_from_text(self, text):
+        tags = text.split(',');
+        tags = [tag.lower().strip() for tag in tags]
+        self.tags.add(*tags)
+
+    def remove_tag(self, tag):
+        self.tags.remove(tag)
 
     @staticmethod
     def get_open_review(challenge, user):
@@ -90,3 +107,7 @@ class ReviewConfig(models.Model):
             return 0
         else:
             return config[0].candidate_offset_max
+    
+    @staticmethod
+    def setup():
+        ReviewConfig.objects.create(candidate_offset_min = 23, candidate_offset_max = 120)
