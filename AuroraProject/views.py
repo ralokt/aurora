@@ -7,6 +7,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from datetime import datetime
 from django.core.urlresolvers import reverse
 
+from pprint import pprint
+from Badges.models import Badge, update_badge_progresses, update_data_dict, update_badge_progress
 from Course.models import Course
 from AuroraUser.models import AuroraUser
 from Evaluation.models import Evaluation
@@ -36,8 +38,15 @@ def home(request, course_short_title=None):
     course = Course.get_or_raise_404(course_short_title)
     data = get_points(request, user, course)
     data = create_stat_data(course,data)
-    context = RequestContext(request, {'newsfeed': data['course']})
 
+    update_badge_progresses(data,user,course)
+    data = update_data_dict(data,user,course)
+    update_badge_progress(data, ('badge_evaluated_points', 0), user, course, 20)
+    data = update_data_dict(data,user,course)
+    update_badge_progress(data, ('badge_handed_in_points', 0), user, course, 30)
+    data = update_data_dict(data,user,course)
+
+    context = RequestContext(request, {'newsfeed': data['course']})
     return render_to_response('home.html', data, context)
 
 

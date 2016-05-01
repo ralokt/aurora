@@ -27,15 +27,18 @@ urlpatterns = patterns('',
     url(r'result_elabs_final', 'AuroraProject.views.result_elabs_final', name='result_elabs_final'),
     url(r'result_reviews', 'AuroraProject.views.result_reviews', name='result_reviews'),
 
+
     url(r'^(?P<course_short_title>(gsi|hci))/', include(patterns('',
         url(r'^$', AuroraProject.views.home, name='home'),
         url(r'^challenge/', include('Challenge.urls', namespace='Challenge')),
+        url(r'^badges/', include('Badges.urls', namespace='Badges')),
         url(r'^elaboration/', include('Elaboration.urls', namespace='Elaboration')),
         url(r'^review/', include('Review.urls', namespace='Review')),
         url(r'^notifications/', include('Notification.urls', namespace='Notification')),
         url(r'^evaluation/', include('Evaluation.urls', namespace='Evaluation')),
         url(r'^statistics/', include('Statistics.urls', namespace='Statistics')),
         url(r'^slides/', include('Slides.urls', namespace='Slides')),
+
         url(r'', include('AuroraUser.urls', namespace='User')),
         ))),
 
