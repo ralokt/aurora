@@ -5,6 +5,7 @@ from django.http import Http404
 
 from Course.models import Course
 
+from Badges.models import update_badge_progress
 from Stack.models import Stack, StackChallengeRelation
 from Evaluation.models import Evaluation
 from Review.models import Review, ReviewEvaluation
@@ -161,6 +162,7 @@ def challenge(request, course_short_title=None):
         data = create_context_view_review(request, data)
 
     return render_to_response('challenge.html', data, context_instance=RequestContext(request))
+
 
 
 def create_context_view_review(request, data):

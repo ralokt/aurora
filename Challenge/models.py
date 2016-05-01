@@ -270,10 +270,10 @@ class Challenge(models.Model):
         return result
 
     def is_in_lock_period(self, user, course):
-        PERIOD = 99
-        START_YEAR = 2015
-        START_MONTH = 3
-        START_DAY = 1
+        PERIOD = 1
+        START_YEAR = 2016
+        START_MONTH = 1
+        START_DAY = 16
 
         final_challenge_ids = Challenge.get_course_final_challenge_ids(course)
         elaborations = (

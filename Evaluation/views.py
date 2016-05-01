@@ -17,6 +17,7 @@ from taggit.models import TaggedItem
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseForbidden
 
+from Badges.models import all_badge_progresses
 from Challenge.models import Challenge
 from Course.models import Course, CourseUserRelation
 from Elaboration.models import Elaboration
@@ -830,6 +831,11 @@ def get_points(request, user, course):
         evaluated_points_available_total = 0
         submitted_points_available_total = 0
         started_points_available_total = 0
+
+        #updating all badge progresses according to badge rule
+        data['badges'] = all_badge_progresses(user, course)
+
+
         for stack in course_stacks:
             is_submitted = stack.get_final_challenge().submitted_by_user(user)
             is_evaluated = stack.is_evaluated(user)

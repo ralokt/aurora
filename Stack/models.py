@@ -1,5 +1,5 @@
 from django.db import models
-
+# frontend-task ist hier eine challenge, frontend-challenge ist hier Stack
 
 class Stack(models.Model):
     title = models.CharField(max_length=100)
