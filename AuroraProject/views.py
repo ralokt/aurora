@@ -8,7 +8,9 @@ from datetime import datetime
 from django.core.urlresolvers import reverse
 from django.conf import settings
 
+from pprint import pprint
 from AuroraProject.decorators import aurora_login_required
+from Badges.models import Badge, update_badge_progresses, update_data_dict, update_badge_progress
 from Course.models import Course
 from AuroraUser.models import AuroraUser
 from Evaluation.models import Evaluation
@@ -67,8 +69,13 @@ def home(request, course_short_title=None):
     data = get_points(request, user, course)
     data = create_stat_data(course,data)
     faq_list = Faq.get_faqs(course_short_title)
-    context = RequestContext(request, {'newsfeed': data['course'], 'faq_list': faq_list})
+    update_badge_progresses(data,user,course)
+    data = update_data_dict(data,user,course)
+    update_badge_progress(data, ('badge_evaluated_points', 0), user, course, 20)
+    update_badge_progress(data, ('badge_handed_in_points', 0), user, course, 30)
+    data = update_data_dict(data,user,course)
 
+    context = RequestContext(request, {'newsfeed': data['course'], 'faq_list': faq_list})
     return render_to_response('home.html', data, context)
 
 

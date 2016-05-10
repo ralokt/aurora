@@ -68,7 +68,6 @@ class Challenge(models.Model):
         7: "Challenge evaluated. Points received: "
     }
 
-
     def __str__(self):
         return u'%s' % self.title
 

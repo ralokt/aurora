@@ -132,6 +132,7 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
     'django.contrib.humanize',
     'AuroraUser',
+    'Badges',
     'Challenge',
     'Course',
     'Elaboration',

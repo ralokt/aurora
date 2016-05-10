@@ -1,6 +1,6 @@
 from django.db import models
 from datetime import datetime, date
-
+# frontend-task ist hier eine challenge, frontend-challenge ist hier Stack
 
 class Stack(models.Model):
     title = models.CharField(max_length=100)
@@ -116,7 +116,6 @@ class Stack(models.Model):
             return "ended"
     def __str__(self):
         return u'%s' % self.title
-
 
 class StackChallengeRelation(models.Model):
     stack = models.ForeignKey('Stack.Stack')

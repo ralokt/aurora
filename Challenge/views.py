@@ -5,6 +5,7 @@ import pprint
 from Course.models import Course
 
 from AuroraProject.decorators import aurora_login_required
+from Badges.models import update_badge_progress
 from Stack.models import Stack, StackChallengeRelation
 from Evaluation.models import Evaluation
 from Review.models import Review, ReviewEvaluation
@@ -124,6 +125,7 @@ def challenges(request, course_short_title=None):
 
     course = Course.get_or_raise_404(short_title=course_short_title)
     data['course'] = course
+
     user = RequestContext(request)['user']
     data['user_enlisted_and_active'] = user.enlisted_and_active_for_course(course)
 
@@ -211,6 +213,7 @@ def challenge(request, course_short_title=None):
         data = create_context_view_review(request, data)
 
     return render_to_response('challenge.html', data, context_instance=RequestContext(request))
+
 
 
 def create_context_view_review(request, data):

@@ -62,16 +62,16 @@ def update_badge_progress(data, badge, user, course, progress=0):
 
         newb.save()
         #pprint(data)
-        pprint("badge does not exist exception")
+        # pprint("badge does not exist exception")
 
 # read progress for one badge from DB
 def badge_progress(badge, user, course):
     try:
-        print("looking for" + badge[0])
+        # print("looking for" + badge[0])
         b = Badge.objects.get(name=badge[0], user=user, course=course)
         if b:
-            print("found " + badge[0])
-            print(b.progress)
+            # print("found " + badge[0])
+            # print(b.progress)
             return b.progress
         else:
             return 0
@@ -81,9 +81,9 @@ def badge_progress(badge, user, course):
 #
 def update_data_dict(data,user,course):
     for item in data["stacks"]:
-        pprint(item)
+        # pprint(item)
         if item["course_title"] == course.title:
-            pprint("match")
+            # pprint("match")
             item["badges"] = all_badge_progresses(user, course)
 
     #pprint(data)

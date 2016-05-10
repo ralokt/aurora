@@ -50,25 +50,40 @@
 
         <div class="feed_pointsDiagram" id="part_diagram">
                     {% if not user.is_staff %}
-            <div class="feed_header"  id="part_0"><i class="fa   fa-toggle-down half"></i> <b>Your points</b></div>
-			<div class="feed_column"  id="content_part_0">
+            <div class="feed_header"  id="part_4"><i class="fa   fa-toggle-down half"></i> <b>Your points</b></div>
+			<div class="feed_column"  id="content_part_4">
                 {% include 'points_diagram.html' %}
 
                 {#% include 'public_stats.html' %#}
 
 			</div>
 		{% else %}
-            <div class="feed_header"  id="part_0"><i class="fa fa-toggle-down half"></i> <b>Your points</b></div>
-			<div class="feed_column"  id="content_part_0">
+            <div class="feed_header"  id="part_4"><i class="fa fa-toggle-down half"></i> <b>Your points</b></div>
+			<div class="feed_column"  id="content_part_4">
 
-            	{% include 'points_diagram.html' %}
+            	{% include 'points.html' %}
                 {% include 'admin_points.html' %}
 
 				{#% include 'public_stats.html' %#}
         {% endif %}
+
+
+		{% if user.is_staff %}
+        <div class="feed_header" id="part_1">
+			<i class="fa fa-toggle-down half"></i> <b>LVA-Team Ressources </b>
+		</div>
+        <div class="feed_column" id="content_part_1">
+			<p><i style="color:gray" class="fa fa-arrow-right"></i> <a target="_blank" href="https://auri1-gsi.pbworks.com/w/page/77253689/FrontPage">Aurora Wiki</a><br>
+			<i style="color:gray" class="fa fa-arrow-right"></i> TUWEL <a target="_blank" href="https://tuwel.tuwien.ac.at/course/view.php?id=5575">gsi</a> <a target="_blank" href="https://tuwel.tuwien.ac.at/course/view.php?id=5581">bhci</a><br><br>
+			<i style="color:gray" class="fa fa-arrow-right"></i> <a href="/admin">django admin</a><br>
+			<i style="color:gray" class="fa fa-arrow-right"></i> some <a href="statistics">statistics</a></p><br>
+		</div>
+		{%  endif %}
+        <div class="feed_header" id="part_1">
+			<i class="fa fa-toggle-down half"></i> <b>General Information </b>
 			</div>
 
-        </div>
+
 
 	        <div class="feed_column" id="content_part_1">
 				<p><b>Wesentliche Hinweise</b> ...<BR>
