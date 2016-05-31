@@ -90,8 +90,8 @@ var draw_all_chapter_badge = function(b) {
         //{'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'blue'},
         //{'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'blue'},
         //bar 1  height rausgeschrieben
-        {'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'url(#gradient)'},
-        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'url(#gradient)'}
+        {'x': 0, 'y': 0, 'widt': 20, 'heig': height, 'skY': 30, 'fill': 'url(#gradient)'},
+        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': height, 'skY': -30, 'fill': 'url(#gradient)'}
     ];
 
     var group1 = svgElement.append('g').attr({
@@ -142,8 +142,8 @@ var draw_handed_in_points_badge = function(b) {
         //{'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'green'},
         //{'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'green'},
         //bar 2
-        {'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'url(#gradient)'},
-        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'url(#gradient)'}
+        {'x': 0, 'y': 0, 'widt': 20, 'heig': height, 'skY': 30, 'fill': 'url(#gradient)'},
+        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': height, 'skY': -30, 'fill': 'url(#gradient)'}
     ];
 
     var group2 = svgElement.append('g').attr({
@@ -190,6 +190,8 @@ var draw_evaluated_points_badge = function(b) {
     //bar check fixed progress
     //b.progress = 60;
 
+    //console.log(b.progress);
+
     if (b.progress > 40) {
 
         var heightScale = d3.scale.linear().domain([40,60]).range([163,280]);
@@ -202,8 +204,6 @@ var draw_evaluated_points_badge = function(b) {
 
         var heightScale = d3.scale.linear().domain([0,40]).range([0,140]);
 
-        //console.log(b.progress);
-        //console.log(b.maximum);
         height = b.progress;
         scaledh = heightScale(height);
     }
@@ -213,8 +213,8 @@ var draw_evaluated_points_badge = function(b) {
         //{'x': 0, 'y': 0, 'widt': 20, 'heig': 280, 'skY': 30, 'fill': 'red'},
         //{'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 280, 'skY': -30, 'fill': 'red'},
         //bar 3
-        {'x': 0, 'y': 0, 'widt': 20, 'heig': 280, 'skY': 30, 'fill': 'url(#gradient)'},
-        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 280, 'skY': -30, 'fill': 'url(#gradient)'}
+        {'x': 0, 'y': 0, 'widt': 20, 'heig': scaledh, 'skY': 30, 'fill': 'url(#gradient)'},
+        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': scaledh, 'skY': -30, 'fill': 'url(#gradient)'}
     ];
 
 
