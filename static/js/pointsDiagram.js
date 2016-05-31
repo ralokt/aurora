@@ -1,6 +1,6 @@
 //variables for SVG viewport
 var canvWidth = 330;
-var canvHeight = 380;
+var canvHeight = 260;
 var margin = 50;
 
 //create SVG viewport
@@ -15,10 +15,10 @@ var labelData = [
     {'cx': 120, 'cy': 305, 'label': 'Kapitel behandelt'},
     {'cx': 120, 'cy': 335, 'label': 'Punkte erhalten'},
     {'cx': 120, 'cy': 365, 'label': 'Punkte abgegeben'},
-    {'cx': 160, 'cy': 186, 'label': '4'},
-    {'cx': 199, 'cy': 165, 'label': '3'},
-    {'cx': 232, 'cy': 146, 'label': '2'},
-    {'cx': 263, 'cy': 127, 'label': '1'}
+    {'cx': 160, 'cy': 161, 'label': '4'},
+    {'cx': 199, 'cy': 140, 'label': '3'},
+    {'cx': 232, 'cy': 121, 'label': '2'},
+    {'cx': 263, 'cy': 102, 'label': '1'}
 ];
 
 //path node data for outlines
@@ -72,7 +72,7 @@ gradient
 gradient
     .append('stop')
     .attr('offset', '0.8')
-    .attr('stop-color', '#008000')
+    .attr('stop-color', '#53c03e')
 
 //draw bar for evaluated points
 var draw_all_chapter_badge = function(b) {
@@ -90,12 +90,12 @@ var draw_all_chapter_badge = function(b) {
         //{'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'blue'},
         //{'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'blue'},
         //bar 1  height rausgeschrieben
-        {'x': 0, 'y': 0, 'widt': 20, 'heig': height, 'skY': 30, 'fill': 'url(#gradient)'},
-        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': height, 'skY': -30, 'fill': 'url(#gradient)'}
+        {'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'url(#gradient)'},
+        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'url(#gradient)'}
     ];
 
     var group1 = svgElement.append('g').attr({
-        'transform': 'translate(145,30) rotate(0, 20, 151.64102172851562)'
+        'transform': 'translate(145,5) rotate(0, 20, 151.64102172851562)'
     });
 
     group1
@@ -133,6 +133,7 @@ var draw_handed_in_points_badge = function(b) {
         b.progress = b.maximum
     }
 
+    //console.log(b.progress);
     //setting height of bar according to progress
     height = 140 * (b.progress / b.maximum)
 
@@ -141,12 +142,12 @@ var draw_handed_in_points_badge = function(b) {
         //{'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'green'},
         //{'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'green'},
         //bar 2
-        {'x': 0, 'y': 0, 'widt': 20, 'heig': height, 'skY': 30, 'fill': 'url(#gradient)'},
-        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': height, 'skY': -30, 'fill': 'url(#gradient)'}
+        {'x': 0, 'y': 0, 'widt': 20, 'heig': 140, 'skY': 30, 'fill': 'url(#gradient)'},
+        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 140, 'skY': -30, 'fill': 'url(#gradient)'}
     ];
 
     var group2 = svgElement.append('g').attr({
-        'transform': 'translate(145,29) rotate(120, 20, 151.64102172851562)'
+        'transform': 'translate(145,4) rotate(120, 20, 151.64102172851562)'
     });
 
     group2
@@ -178,7 +179,7 @@ var draw_handed_in_points_badge = function(b) {
         });
 }
 
-//draw bar for handed in chapters
+//draw bar for evaluated points
 var draw_evaluated_points_badge = function(b) {
 
     //bar limit
@@ -212,13 +213,13 @@ var draw_evaluated_points_badge = function(b) {
         //{'x': 0, 'y': 0, 'widt': 20, 'heig': 280, 'skY': 30, 'fill': 'red'},
         //{'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 280, 'skY': -30, 'fill': 'red'},
         //bar 3
-        {'x': 0, 'y': 0, 'widt': 20, 'heig': height, 'skY': 30, 'fill': 'url(#gradient)'},
-        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': height, 'skY': -30, 'fill': 'url(#gradient)'}
+        {'x': 0, 'y': 0, 'widt': 20, 'heig': 280, 'skY': 30, 'fill': 'url(#gradient)'},
+        {'x': 20, 'y': 22.91025543212891, 'widt': 20, 'heig': 280, 'skY': -30, 'fill': 'url(#gradient)'}
     ];
 
 
     var group3 = svgElement.append('g').attr({
-        'transform': 'translate(146,29) rotate(240, 20, 151.64102172851562)'
+        'transform': 'translate(146,4) rotate(240, 20, 151.64102172851562)'
     });
 /*
     //tooltip div
@@ -258,13 +259,29 @@ var draw_evaluated_points_badge = function(b) {
 
 }
 
+
 function drawBadges(){
     draw_evaluated_points_badge(svgData["badge_evaluated_points"]);
     draw_handed_in_points_badge(svgData["badge_handed_in_points"]);
     draw_all_chapter_badge(svgData["badge_all_chapter"]);
 }
 
-drawBadges();
+//console.log(svgData.badge_evaluated_points.maximum);
+
+
+//checking conditions for grade bar above grade 4 - 'handed in badge' and 'evaluated points badge' are preconditions
+if (svgData.badge_evaluated_points.progress >= svgData.badge_evaluated_points.maximum
+    && svgData.badge_all_chapter.progress == svgData.badge_all_chapter.maximum
+    && svgData.handed_in_points.progress == svgData.handed_in_points.maximum) {
+
+    drawBadges();
+} else if (svgData.badge_evaluated_points.progress > svgData.badge_evaluated_points.maximum) {
+
+    svgData.badge_evaluated_points.progress = svgData.badge_evaluated_points.progress;
+    drawBadges();
+} else {
+    drawBadges();
+}
 
 //definition of draw function for outlines
 var pathFunction = d3.svg
@@ -277,7 +294,8 @@ svgElement.append('path').attr({
     'd': pathFunction(pathGradeSeperator3),
     'stroke-width': 1,
     'fill': 'none',
-    'stroke': 'rgb(190,190,190)'
+    'stroke': 'rgb(190,190,190)',
+    'transform': 'translate(0,-25)'
 });
 
 //grade indicator 3-2
@@ -285,7 +303,8 @@ svgElement.append('path').attr({
     'd': pathFunction(pathGradeSeperator2),
     'stroke-width': 1,
     'fill': 'none',
-    'stroke': 'rgb(190,190,190)'
+    'stroke': 'rgb(190,190,190)',
+    'transform': 'translate(0,-25)'
 });
 
 //draw outlines on svg viewport
@@ -293,7 +312,8 @@ svgElement.append('path').attr({
     'd': pathFunction(pathOutlineData),
     'stroke':'grey',
     'stroke-width': 1,
-    'fill': 'none'
+    'fill': 'none',
+    'transform': 'translate(0,-25)'
 });
 
 //draw outlines for positive grade scale on svg viewport
@@ -301,7 +321,8 @@ svgElement.append('path').attr({
     'd': pathFunction(pathPosOutlineData),
     'stroke':'grey',
     'stroke-width': 1,
-    'fill': 'none'
+    'fill': 'none',
+    'transform': 'translate(0,-25)'
 });
 
 //placing labels on svg viewport
@@ -326,7 +347,7 @@ var imgs1 = svgElement.append("g")
         .append("svg:image")
         .attr("xlink:href", "/static/img/badges/badge_allchapter.png")
         .attr("x", "155")
-        .attr("y", "53")
+        .attr("y", "28")
         .attr("width", "20")
         .attr("height", "20");
 
@@ -336,7 +357,7 @@ var imgs2 = svgElement.append("g")
         .append("svg:image")
         .attr("xlink:href", "/static/img/badges/badge_ptsawarded.png")
         .attr("x", "55")
-        .attr("y", "230")
+        .attr("y", "205")
         .attr("width", "20")
         .attr("height", "20");
 
@@ -346,10 +367,12 @@ var imgs3 = svgElement.append("g")
         .append("svg:image")
         .attr("xlink:href", "/static/img/badges/badge_handedin.png")
         .attr("x", "255")
-        .attr("y", "230")
+        .attr("y", "205")
         .attr("width", "20")
         .attr("height", "20");
 
+
+/* depricated caption images
 //place img for legend: all chapter
 var imgs4 = svgElement.append("g")
     imgs4
@@ -379,3 +402,4 @@ var imgs3 = svgElement.append("g")
         .attr("y", "350")
         .attr("width", "20")
         .attr("height", "20");
+*/

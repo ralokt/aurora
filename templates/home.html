@@ -11,22 +11,22 @@
     <div id="info_column">
         {% if not user.is_staff %}
 		<div class="sidebar_item">
-            <div class="feed_header"  id="part_0"><i class="fa   fa-toggle-down half"></i> <b>Your work</b></div>
+            <div class="feed_header"  id="part_0"><i class="fa fa-toggle-down half"></i> <b>Your work</b></div>
 			<div class="feed_column"  id="content_part_0">
-            	{% include 'points.html' %}
+{#            	{% include 'points.html' %}#}
+{#          	{% include 'public_stats.html' %}#}
+                {% include 'points_diagram.html' %}
 
-                {#% include 'public_stats.html' %#}
-
+			</div>
 		</div>
 		{% else %}
 		<div class="sidebar_item">
             <div class="feed_header"  id="part_0"><i class="fa fa-toggle-down half"></i> <b>Your work</b></div>
 			<div class="feed_column"  id="content_part_0">
-
-            	{% include 'points.html' %}
             	{% include 'admin_points.html' %}
+				{% include 'public_stats.html' %}
+                {% include 'points_diagram.html' %}
 
-				{#% include 'public_stats.html' %#}
 			</div>
 		</div>
         {% endif %}
@@ -46,45 +46,7 @@
 		<div class="sidebar_item">
 	        <div class="feed_header" id="part_1">
 				<i class="fa fa-toggle-down half"></i> <b>General Information </b>
-		</div>
-
-        <div class="feed_pointsDiagram" id="part_diagram">
-                    {% if not user.is_staff %}
-            <div class="feed_header"  id="part_4"><i class="fa   fa-toggle-down half"></i> <b>Your points</b></div>
-			<div class="feed_column"  id="content_part_4">
-                {% include 'points_diagram.html' %}
-
-                {#% include 'public_stats.html' %#}
-
 			</div>
-		{% else %}
-            <div class="feed_header"  id="part_4"><i class="fa fa-toggle-down half"></i> <b>Your points</b></div>
-			<div class="feed_column"  id="content_part_4">
-
-            	{% include 'points.html' %}
-                {% include 'admin_points.html' %}
-
-				{#% include 'public_stats.html' %#}
-        {% endif %}
-
-
-		{% if user.is_staff %}
-        <div class="feed_header" id="part_1">
-			<i class="fa fa-toggle-down half"></i> <b>LVA-Team Ressources </b>
-		</div>
-        <div class="feed_column" id="content_part_1">
-			<p><i style="color:gray" class="fa fa-arrow-right"></i> <a target="_blank" href="https://auri1-gsi.pbworks.com/w/page/77253689/FrontPage">Aurora Wiki</a><br>
-			<i style="color:gray" class="fa fa-arrow-right"></i> TUWEL <a target="_blank" href="https://tuwel.tuwien.ac.at/course/view.php?id=5575">gsi</a> <a target="_blank" href="https://tuwel.tuwien.ac.at/course/view.php?id=5581">bhci</a><br><br>
-			<i style="color:gray" class="fa fa-arrow-right"></i> <a href="/admin">django admin</a><br>
-			<i style="color:gray" class="fa fa-arrow-right"></i> some <a href="statistics">statistics</a></p><br>
-		</div>
-		{%  endif %}
-        <div class="feed_header" id="part_1">
-			<i class="fa fa-toggle-down half"></i> <b>General Information </b>
-			</div>
-
-
-
 	        <div class="feed_column" id="content_part_1">
 				<p><b>Wesentliche Hinweise</b> ...<BR>
 					...zum <a href="http://igw.tuwien.ac.at/aurora/aurora_challenges.pdf">Arbeiten in Aurora</a><br>
@@ -157,7 +119,7 @@
 						<td witdh="2%"></td></tr>
 					<tr><td>April</td>
 						<td></td>
-                        <td align="right">5</td>
+						<td align="right">5</td>
 						<td align="right">12</td>
 						<td align="right">19</td>
 						<td align="right">26</td>
@@ -197,10 +159,10 @@
 						<td align="right">25</td>
 						<td witdh="2%"></td></tr>
 					<tr><td>Juni</td>
-						<td align="right">1</td>
+						<td align="right" style="color:silver">1</td>
 						<td align="right">8</td>
-						<td align="right" style="color:gray">*15</td>
-						<td align="right" style="color:gray">*22</td>
+						<td align="right" style="color:silver">15</td>
+						<td align="right">22</td>
 						<td align="right" style="color:gray">*29</td>
 						<td witdh="2%"></td></tr>
 				{% endif %}

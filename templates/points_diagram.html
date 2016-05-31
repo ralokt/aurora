@@ -5,7 +5,7 @@
 
     <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/circle.css" type="text/css" media="screen"/>
+    {% comment %}<link rel="stylesheet" href="{{ STATIC_URL }}css/circle.css" type="text/css" media="screen"/>{% endcomment %}
     <link rel="stylesheet" href="{{ STATIC_URL }}css/points.css" type="text/css" media="screen"/>
 
     <script type="text/javascript">
@@ -17,6 +17,7 @@
         {% endfor %}
     </script>
 
+
 {% endblock %}
 
 {% block contents %}
@@ -26,4 +27,45 @@
         </div>
     </div>
     <script src="{{ STATIC_URL }}js/pointsDiagram.js"></script>
+
+    <div class="points-table">
+        <table>
+            <tr><td><b>Badges:</b></td></tr>
+
+            <tr><td width="75 px"><span title="Awarded Points"><i id="badge_awarded_points_img" class="fa fa-trophy fa-3x" style="color:gray"></i></span>&nbsp;</td>
+                <td width="75 px"><span title="Handed in Points"><i id="badge_handed_in_points_img" class="fa fa-paper-plane fa-3x" style="color:gray"></i></span>&nbsp;</td>
+                <td width="75 px"><span title="All Chapter Badge"><i id="badge_all_chapter_img" class="fa fa-book fa-3x" style="color:gray"></i></span>&nbsp;</td></tr>
+
+            <tr><td id="badge_awarded_points">&nbsp;</td>
+                <td id="badge_handed_in_points">&nbsp;</td>
+                <td id="badge_all_chapter">&nbsp;</td>
+            </tr>
+        </table>
+    </div>
+    </br>
+
+    <script type="text/javascript">
+        function fillBadgePointsDiv(){
+
+            document.getElementById("badge_awarded_points").innerText = svgData.badge_evaluated_points.progress + " / " + svgData.badge_evaluated_points.maximum;
+            document.getElementById("badge_handed_in_points").innerText = svgData.badge_handed_in_points.progress + " / " + svgData.badge_handed_in_points.maximum;
+            document.getElementById("badge_all_chapter").innerText = svgData.badge_all_chapter.progress + " / " + svgData.badge_all_chapter.maximum;
+        }
+
+        function awardBadge(){
+
+            if (svgData.badge_evaluated_points.progress == svgData.badge_evaluated_points.maximum) {
+                document.getElementById("badge_awarded_points_img").style = "color:green";}
+
+            if (svgData.badge_evaluated_points.progress == svgData.badge_evaluated_points.maximum) {
+                document.getElementById("badge_handed_in_points_img").style = "color:green";}
+
+            if (svgData.badge_evaluated_points.progress == svgData.badge_evaluated_points.maximum) {
+                document.getElementById("badge_all_chapter_img").style = "color:green";}
+        }
+
+        fillBadgePointsDiv();
+        awardBadge();
+    </script>
+
 {% endblock %}
