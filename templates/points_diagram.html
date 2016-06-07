@@ -47,9 +47,12 @@
     <script type="text/javascript">
         function fillBadgePointsDiv(){
 
-            document.getElementById("badge_awarded_points").innerText = svgData.badge_evaluated_points.progress + " / " + svgData.badge_evaluated_points.maximum;
-            document.getElementById("badge_handed_in_points").innerText = svgData.badge_handed_in_points.progress + " / " + svgData.badge_handed_in_points.maximum;
-            document.getElementById("badge_all_chapter").innerText = svgData.badge_all_chapter.progress + " / " + svgData.badge_all_chapter.maximum;
+            document.getElementById("badge_awarded_points").innerText = svgData.badge_evaluated_points.progress
+                    + " / " + svgData.badge_evaluated_points.maximum;
+            document.getElementById("badge_handed_in_points").innerText = svgData.badge_handed_in_points.progress
+                    + " / " + svgData.badge_handed_in_points.maximum;
+            document.getElementById("badge_all_chapter").innerText = svgData.badge_all_chapter.progress
+                    + " / " + svgData.badge_all_chapter.maximum;
         }
 
         function awardBadge(){

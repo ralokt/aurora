@@ -873,7 +873,6 @@ def get_points(request, user, course):
         #updating all badge progresses according to badge rule
         data['badges'] = all_badge_progresses(user, course)
 
-
         for stack in course_stacks:
             is_submitted = stack.get_final_challenge().submitted_by_user(user)
             is_evaluated = stack.is_evaluated(user)

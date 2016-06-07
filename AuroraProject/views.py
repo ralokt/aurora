@@ -71,9 +71,9 @@ def home(request, course_short_title=None):
     faq_list = Faq.get_faqs(course_short_title)
     update_badge_progresses(data,user,course)
     data = update_data_dict(data,user,course)
-    update_badge_progress(data, ('badge_evaluated_points', 0), user, course, 20)
-    update_badge_progress(data, ('badge_handed_in_points', 0), user, course, 30)
-    data = update_data_dict(data,user,course)
+    # update_badge_progress(data, ('badge_evaluated_points', 0), user, course, 20)
+    # update_badge_progress(data, ('badge_handed_in_points', 0), user, course, 30)
+    # data = update_data_dict(data,user,course)
 
     context = RequestContext(request, {'newsfeed': data['course'], 'faq_list': faq_list})
     return render_to_response('home.html', data, context)
