@@ -43,33 +43,33 @@ def update_badge_progress(data, badge, user, course, progress=0):
                               None)
 
         chapterList = set()
-        # pprint(data)
 
-        for c in Stack.objects.all().filter(course = course):
-            if c.chapter != None:
-                chapterList.add(c.chapter)
+        #pprint(chapterChecker)
+        for c in Chapter.objects.all():
+            chapterList.add(c.name)
 
-        if chapterChecker is None:
+        if chapterChecker is None and chapterList is None:
             progress = 0
+            maximum = 0
+        elif chapterChecker is None:
+            progress = 0
+        elif chapterList is None:
+            maximum = 0
         else:
-
             maximum = len(chapterList)
             badges[2] = ("badge_all_chapter", maximum)
-            progress = len([x for x in chapterChecker if x["is_started"] is True])
-
+            progress = len([x for x in chapterChecker if x["is_submitted"] is True])
 
     try:
         b = Badge.objects.get(name=badgename, user=user, course=course)
         b.progress = progress
         b.save()
 
-        #pprint(data)
-
     except Badge.DoesNotExist:
         newb = Badge(name=badgename, user=user, course=course, progress=progress)
 
         newb.save()
-        #pprint(data)
+
         #pprint("badge does not exist exception")
 
 # read progress for one badge from DB
