@@ -1,5 +1,6 @@
 from django.db import models
 from Stack.models import Stack, StackChallengeRelation, Chapter
+from Stack.admin import ChapterAdmin
 from pprint import pprint
 from django.http import HttpResponse
 
@@ -44,32 +45,31 @@ def update_badge_progress(data, badge, user, course, progress=0):
 
         chapterList = set()
 
-        #pprint(chapterChecker)
-        for c in Chapter.objects.all():
-            chapterList.add(c.name)
+        for c in Stack.objects.all().filter(course = course):
+            chapterList.add(c.chapter)
 
-        if chapterChecker is None and chapterList is None:
+        if chapterChecker is None:
             progress = 0
-            maximum = 0
-        elif chapterChecker is None:
-            progress = 0
-        elif chapterList is None:
+        if chapterList is None:
             maximum = 0
         else:
             maximum = len(chapterList)
             badges[2] = ("badge_all_chapter", maximum)
             progress = len([x for x in chapterChecker if x["is_submitted"] is True])
 
+
     try:
         b = Badge.objects.get(name=badgename, user=user, course=course)
         b.progress = progress
         b.save()
 
+        #pprint(data)
+
     except Badge.DoesNotExist:
         newb = Badge(name=badgename, user=user, course=course, progress=progress)
 
         newb.save()
-
+        #pprint(data)
         #pprint("badge does not exist exception")
 
 # read progress for one badge from DB
