@@ -26,7 +26,7 @@ def update_badge_progress(data, badge, user, course, progress=0):
     # conditions for main badge evaluated Points
     if badgename == 'badge_evaluated_points':
 
-        ptsUpdate = next((item["evaluated_points_earned_total"] for item in data["stacks"] if
+        ptsUpdate = next((item["evaluafted_points_earned_total"] for item in data["stacks"] if
                          item["course_title"] == str(course)), None)
 
         progress += ptsUpdate
@@ -36,7 +36,10 @@ def update_badge_progress(data, badge, user, course, progress=0):
         ptsUpdate = next((item["submitted_points_available_total"] for item in data["stacks"] if
                         item["course_title"] == str(course)), None)
 
-        progress += ptsUpdate
+        ptsAwarded = next((item["evaluafted_points_earned_total"] for item in data["stacks"] if
+                         item["course_title"] == str(course)), None)
+
+        progress += ptsUpdate + ptsAwarded
 
     # conditions for main badge chapter task: at least one task from all chapters
     if badgename == 'badge_all_chapter':
