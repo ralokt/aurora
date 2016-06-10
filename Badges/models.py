@@ -57,20 +57,15 @@ def update_badge_progress(data, badge, user, course, progress=0):
             badges[2] = ("badge_all_chapter", maximum)
             progress = len([x for x in chapterChecker if x["is_submitted"] is True])
 
-
     try:
         b = Badge.objects.get(name=badgename, user=user, course=course)
         b.progress = progress
         b.save()
 
-        #pprint(data)
-
     except Badge.DoesNotExist:
         newb = Badge(name=badgename, user=user, course=course, progress=progress)
 
         newb.save()
-        #pprint(data)
-        #pprint("badge does not exist exception")
 
 # read progress for one badge from DB
 def badge_progress(badge, user, course):
