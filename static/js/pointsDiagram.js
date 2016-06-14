@@ -133,7 +133,7 @@ var draw_handed_in_points_badge = function(b) {
         b.progress = b.maximum
     }
 
-    //console.log(b.progress);
+
     //setting height of bar according to progress
     height = 140 * (b.progress / b.maximum)
 
@@ -182,16 +182,6 @@ var draw_handed_in_points_badge = function(b) {
 //draw bar for evaluated points
 var draw_evaluated_points_badge = function(b) {
 
-    //bar limit
-    if (b.progress >= b.maximum) {
-        b.progress = b.maximum
-    }
-
-    //bar check fixed progress
-    //b.progress = 60;
-
-    //console.log(b.progress);
-
     if (b.progress > 40) {
 
         var heightScale = d3.scale.linear().domain([40,60]).range([163,280]);
@@ -221,15 +211,7 @@ var draw_evaluated_points_badge = function(b) {
     var group3 = svgElement.append('g').attr({
         'transform': 'translate(146,4) rotate(240, 20, 151.64102172851562)'
     });
-/*
-    //tooltip div
-    var tooltip = d3.select("#chart")
-	.append("div")
-	.style("position", "absolute")
-	.style("z-index", "10")
-	.style("visibility", "hidden")
-	.text("Punkte erhalten");
-*/
+
     group3
         .selectAll('rect')
         .data(bar3ConstructorValues)
@@ -266,18 +248,19 @@ function drawBadges(){
     draw_all_chapter_badge(svgData["badge_all_chapter"]);
 }
 
-//console.log(svgData.badge_evaluated_points.maximum);
-
-
 //checking conditions for grade bar above grade 4 - 'handed in badge' and 'evaluated points badge' are preconditions
 if (svgData.badge_evaluated_points.progress >= svgData.badge_evaluated_points.maximum
     && svgData.badge_all_chapter.progress == svgData.badge_all_chapter.maximum
-    && svgData.handed_in_points.progress == svgData.handed_in_points.maximum) {
-
+    && svgData.badge_handed_in_points.progress == svgData.badge_handed_in_points.maximum) {
     drawBadges();
-} else if (svgData.badge_evaluated_points.progress > svgData.badge_evaluated_points.maximum) {
+}
+//conditions not met and eval_points.progress >= max: adjust progress
+if (svgData.badge_evaluated_points.progress >= svgData.badge_evaluated_points.maximum
+    && (svgData.badge_all_chapter.progress < svgData.badge_all_chapter.maximum
+    || svgData.badge_handed_in_points.progress < svgData.badge_handed_in_points.maximum)) {
 
-    svgData.badge_evaluated_points.progress = svgData.badge_evaluated_points.progress;
+    svgData.badge_evaluated_points.progress = svgData.badge_evaluated_points.maximum;
+
     drawBadges();
 } else {
     drawBadges();
@@ -370,36 +353,3 @@ var imgs3 = svgElement.append("g")
         .attr("y", "205")
         .attr("width", "20")
         .attr("height", "20");
-
-
-/* depricated caption images
-//place img for legend: all chapter
-var imgs4 = svgElement.append("g")
-    imgs4
-        .append("svg:image")
-        .attr("xlink:href", "/static/img/badges/badge_allchapter.png")
-        .attr("x", "80")
-        .attr("y", "290")
-        .attr("width", "20")
-        .attr("height", "20");
-
-//place img for legend: points awarded
-var imgs5 = svgElement.append("g")
-    imgs5
-        .append("svg:image")
-        .attr("xlink:href", "/static/img/badges/badge_ptsawarded.png")
-        .attr("x", "80")
-        .attr("y", "320")
-        .attr("width", "20")
-        .attr("height", "20");
-
-//place img for legend: points handed in
-var imgs3 = svgElement.append("g")
-    imgs3
-        .append("svg:image")
-        .attr("xlink:href", "/static/img/badges/badge_handedin.png")
-        .attr("x", "80")
-        .attr("y", "350")
-        .attr("width", "20")
-        .attr("height", "20");
-*/

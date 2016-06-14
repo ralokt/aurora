@@ -1,6 +1,5 @@
 from django.db import models
 from Stack.models import Stack, StackChallengeRelation, Chapter
-from Stack.admin import ChapterAdmin
 from pprint import pprint
 from django.http import HttpResponse
 
@@ -33,13 +32,13 @@ def update_badge_progress(data, badge, user, course, progress=0):
 
     # conditions for main badge showing handed in points
     if badgename == 'badge_handed_in_points':
-        ptsUpdate = next((item["submitted_points_available_total"] for item in data["stacks"] if
-                        item["course_title"] == str(course)), None)
 
-        ptsAwarded = next((item["evaluated_points_earned_total"] for item in data["stacks"] if
+        courseFiltered = next((item["course_stacks"] for item in data["stacks"] if
                          item["course_title"] == str(course)), None)
 
-        progress += ptsUpdate + ptsAwarded
+        started = [x for x in courseFiltered if x["is_submitted"] is True]
+
+        progress = sum(x["points_available"] for x in started)
 
     # conditions for main badge chapter task: at least one task from all chapters
     if badgename == 'badge_all_chapter':
@@ -52,13 +51,13 @@ def update_badge_progress(data, badge, user, course, progress=0):
             chapterList.add(c.chapter)
 
         if chapterChecker is None:
-            progress = 0
+            progress += 0
         if chapterList is None:
             maximum = 0
         else:
             maximum = len(chapterList)
             badges[2] = ("badge_all_chapter", maximum)
-            progress = len([x for x in chapterChecker if x["is_submitted"] is True])
+            progress += len([x for x in chapterChecker if x["is_submitted"] is True])
 
     try:
         b = Badge.objects.get(name=badgename, user=user, course=course)
@@ -73,11 +72,9 @@ def update_badge_progress(data, badge, user, course, progress=0):
 # read progress for one badge from DB
 def badge_progress(badge, user, course):
     try:
-        # print("looking for" + badge[0])
         b = Badge.objects.get(name=badge[0], user=user, course=course)
         if b:
-            # print("found " + badge[0])
-            # print(b.progress)
+
             return b.progress
         else:
             return 0
@@ -87,12 +84,9 @@ def badge_progress(badge, user, course):
 #
 def update_data_dict(data,user,course):
     for item in data["stacks"]:
-        # pprint(item)
         if item["course_title"] == course.title:
-            # pprint("match")
             item["badges"] = all_badge_progresses(user, course)
 
-    # pprint(data)
 
     return data
 
