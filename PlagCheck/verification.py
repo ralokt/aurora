@@ -38,7 +38,7 @@ def plagcheck_store(dry_run=False, **kwargs):
         doc = Document.objects.get(
             elaboration_id=kwargs['elaboration_id'],
             user_id=kwargs['user_id'],
-            is_revised=kwargs['is_revised'],
+            is_revised=kwargs.get('is_revised', False),
         )
 
         # skip verification if latest version already stored

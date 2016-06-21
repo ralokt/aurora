@@ -1,6 +1,6 @@
 import re
 
-from PlagCheck.util.filter import SuspicionFilter
+from PlagCheck.util.filter import SuspicionFilter, AllSuspicionsFilter
 from PlagCheck.util.state import SuspicionState
 from PlagCheck.util.settings import PlagCheckSettings
 
@@ -44,5 +44,13 @@ class DummyUserFilter(SuspicionFilter):
     @staticmethod
     def filter(suspicion):
         if re.match('^(Nickname_){0,1}[ds]\d+$', suspicion.suspect_doc.user_name):
+            return None
+        return SuspicionState.SUSPECTED
+
+
+class FilteredDocumentFilter(AllSuspicionsFilter):
+    @staticmethod
+    def filter(suspicion):
+        if suspicion.similar_doc.is_filter or suspicion.suspect_doc.is_filter:
             return None
         return SuspicionState.SUSPECTED

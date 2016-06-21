@@ -35,6 +35,7 @@ class Document(models.Model):
     user_name = models.CharField(max_length=100, null=True)
     submission_time = models.DateTimeField(null=True)
     is_revised = models.BooleanField(null=False, default=False)
+    is_filter = models.BooleanField(null=False, default=False)
 
     def get_elaboration(self):
         return Elaboration.objects.get(pk=self.elaboration_id)

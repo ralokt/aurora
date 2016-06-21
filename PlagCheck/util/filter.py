@@ -12,6 +12,11 @@ class SuspicionFilter(object):
     def filter(suspicion):
         raise NotImplementedError("subclass and implement static filter method")
 
+class AllSuspicionsFilter(SuspicionFilter):
+    @staticmethod
+    def filter(suspicion):
+        raise NotImplementedError("subclass and implement static filter method")
+
 
 def filter_suspicion(suspicion, suspicion_filters=[]):
     """Run through all given filters and determine

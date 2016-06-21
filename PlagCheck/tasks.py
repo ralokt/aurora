@@ -12,7 +12,7 @@ from django.db.utils import OperationalError
 
 from PlagCheck.models import Reference, Result, Suspicion, Document
 
-from PlagCheck.util.filter import filter_suspicion, load_suspicion_filters
+from PlagCheck.util.filter import filter_suspicion, load_suspicion_filters, AllSuspicionsFilter
 import sherlock
 
 app = Celery('AuroraProject')
@@ -66,7 +66,15 @@ def check(self, **kwargs):
 
         hash_count = len(hash_set)
 
+        result = Result.objects.create(
+            hash_count=hash_count,
+            doc_id=suspect_doc.id,
+            submission_time=suspect_doc.submission_time.isoformat(),
+        )
+
         # check if hashes are generated which means punctuations found
+        filter_all = False
+        all_suspicions_state = None
         suspicions = list()
         if hash_count > 0:
             # store (new) references
@@ -81,39 +89,37 @@ def check(self, **kwargs):
 
                 if similarity > 100:
                     raise PlagcheckError(
-                        'computed similarity is greated than 100% ({0}). doc_id={5}, '
-                        'similar_doc_id={1}, hash_count={4}, match_count={2}'
+                        'computed similarity is greated than 100% ({0}). doc_id={4}, '
+                        'similar_doc_id={1}, hash_count={3}, match_count={2}'
                         .format(similarity, similar_doc_id, match_count, hash_count, suspect_doc.id)
                     )
 
                 # put them in a list so that filtered
                 # findings can be handled later
-                suspicions.append({
-                    'similar_doc_id': similar_doc_id,
-                    'similarity': similarity,
-                    'match_count': match_count
-                })
+                suspicion = Suspicion(
+                    suspect_doc_id=suspect_doc.id,
+                    similar_doc_id=similar_doc_id,
+                    similarity=similarity,
+                    match_count=match_count,
+                    result=result,
+                    state=Suspicion.DEFAULT_STATE.value
+                )
 
-        result = Result.objects.create(
-            hash_count=hash_count,
-            doc_id=suspect_doc.id,
-            submission_time=suspect_doc.submission_time.isoformat(),
-        )
+                (suspicion_state, reason) = filter_suspicion(suspicion, suspicion_filters)
 
-        for suspicion_item in suspicions:
-            suspicion = Suspicion(
-                suspect_doc_id=suspect_doc.id,
-                similar_doc_id=suspicion_item['similar_doc_id'],
-                similarity=suspicion_item['similarity'],
-                match_count=suspicion_item['match_count'],
-                result=result,
-                state=Suspicion.DEFAULT_STATE.value
-            )
+                if suspicion.state and issubclass(suspicion_state, AllSuspicionsFilter):
+                    filter_all = True
+                    all_suspicions_state = suspicion_state
 
-            (suspicion_state, reason) = filter_suspicion(suspicion, suspicion_filters)
+                suspicions.append((suspicion, suspicion_state, reason))
 
-            if suspicion_state is not None:
-                suspicion.state = suspicion_state.value
+        for suspicion, suspicion_state, reason in suspicions:
+            new_suspicion_state = suspicion_state
+            if filter_all:
+                new_suspicion_state = all_suspicions_state
+
+            if new_suspicion_state is not None:
+                suspicion.state = new_suspicion_state.value
                 suspicion.save()
 
         return result.celery_result()
