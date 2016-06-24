@@ -4,6 +4,7 @@ import os
 import logging
 
 from celery import Celery
+from copy import deepcopy
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AuroraProject.settings')
@@ -11,7 +12,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AuroraProject.settings')
 from django.conf import settings
 from django.db.utils import OperationalError
 
-from PlagCheck.models import Reference, Result, Suspicion, Document
+from PlagCheck.models import Reference, Result, Suspicion, Document, SuspicionState
 
 from PlagCheck.util.filter import filter_suspicion, load_suspicion_filters, SuperFilter
 import sherlock
@@ -125,9 +126,26 @@ def check(self, **kwargs):
                 print('super filter')
                 new_suspicion_state = all_suspicions_state
 
-            if new_suspicion_state is not None:
-                suspicion.state = new_suspicion_state.value
-                suspicion.save()
+            existing_suspicions = Suspicion.objects.filter(
+                suspect_doc_id=suspicion.suspect_doc_id,
+                similar_doc_id=suspicion.similar_doc_id,
+            )
+
+            if existing_suspicions.count():
+                print('Found existing suspicions')
+                for existing_suspicion in existing_suspicions:
+                    if new_suspicion_state is not None:
+                        updated_existing_suspicion = deepcopy(suspicion)
+                        updated_existing_suspicion.id = existing_suspicion.id
+                        updated_existing_suspicion.pk = existing_suspicion.pk
+                        updated_existing_suspicion.state = new_suspicion_state.value
+                        updated_existing_suspicion.save()
+                    else:
+                        existing_suspicion.delete()
+            else:
+                if new_suspicion_state is not None:
+                    suspicion.state = new_suspicion_state.value
+                    suspicion.save()
 
         return result.celery_result()
     except OperationalError as e:
