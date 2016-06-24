@@ -30,6 +30,11 @@ class ChallengeAdmin(admin.ModelAdmin):
         'course',
         'points'
     )
+    search_fields = (
+        'id',
+        'title',
+        'subtitle'
+    )
 
 admin.site.register(Challenge, ChallengeAdmin)
 
