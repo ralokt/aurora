@@ -77,8 +77,8 @@ def check(self, **kwargs):
         )
 
         # check if hashes are generated which means punctuations found
-        filter_all = False
-        all_suspicions_state = None
+        is_dominated_by_super_state = False
+        super_state = None
         suspicions = list()
         if hash_count > 0:
             # store (new) references
@@ -112,39 +112,33 @@ def check(self, **kwargs):
                 (suspicion_state, reason) = filter_suspicion(suspicion, suspicion_filters)
 
                 if issubclass(reason, SuperFilter):
-                    filter_all = True
-                    all_suspicions_state = suspicion_state
+                    is_dominated_by_super_state = True
+                    super_state = suspicion_state
 
                 suspicions.append((suspicion, suspicion_state, reason))
 
         for suspicion, suspicion_state, reason in suspicions:
-            new_suspicion_state = suspicion_state
+            new_state = suspicion_state
 
-            print(suspicion.__dict__)
+            if is_dominated_by_super_state:
+                new_state = super_state
 
-            if filter_all:
-                print('super filter')
-                new_suspicion_state = all_suspicions_state
+            try:
+                existing_suspicion = Suspicion.objects.get(
+                    suspect_doc_id=suspicion.suspect_doc_id,
+                    similar_doc_id=suspicion.similar_doc_id,
+                )
+                logging.DEBUG('Found existing suspicion, updating it')
 
-            existing_suspicions = Suspicion.objects.filter(
-                suspect_doc_id=suspicion.suspect_doc_id,
-                similar_doc_id=suspicion.similar_doc_id,
-            )
+                if new_state is not None:
+                    existing_suspicion.state = new_state.value
+                    existing_suspicion.save()
+                else:
+                    existing_suspicion.state = SuspicionState.NOT_SUSPECTED.value
 
-            if existing_suspicions.count():
-                print('Found existing suspicions')
-                for existing_suspicion in existing_suspicions:
-                    if new_suspicion_state is not None:
-                        updated_existing_suspicion = deepcopy(suspicion)
-                        updated_existing_suspicion.id = existing_suspicion.id
-                        updated_existing_suspicion.pk = existing_suspicion.pk
-                        updated_existing_suspicion.state = new_suspicion_state.value
-                        updated_existing_suspicion.save()
-                    else:
-                        existing_suspicion.delete()
-            else:
-                if new_suspicion_state is not None:
-                    suspicion.state = new_suspicion_state.value
+            except Suspicion.DoesNotExist:
+                if new_state is not None:
+                    suspicion.state = new_state.value
                     suspicion.save()
 
         return result.celery_result()

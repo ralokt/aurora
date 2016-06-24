@@ -12,6 +12,7 @@ class SuspicionState(IntEnum):
     FALSE_POSITIVE = 2
     CITED = 3
     SUSPECTED_SELF_PLAGIARISM = 4
+    NOT_SUSPECTED = 5
 
     @staticmethod
     def states():
