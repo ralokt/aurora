@@ -1,6 +1,6 @@
 import re
 
-from PlagCheck.util.filter import SuspicionFilter, AllSuspicionsFilter
+from PlagCheck.util.filter import SuspicionFilter, SuperFilter
 from PlagCheck.util.state import SuspicionState
 from PlagCheck.util.settings import PlagCheckSettings
 
@@ -48,7 +48,7 @@ class DummyUserFilter(SuspicionFilter):
         return SuspicionState.SUSPECTED
 
 
-class FilteredDocumentFilter(AllSuspicionsFilter):
+class FilteredDocumentSuperFilter(SuperFilter):
     @staticmethod
     def filter(suspicion):
         if suspicion.similar_doc.is_filter or suspicion.suspect_doc.is_filter:

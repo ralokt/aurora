@@ -12,7 +12,7 @@ class SuspicionFilter(object):
     def filter(suspicion):
         raise NotImplementedError("subclass and implement static filter method")
 
-class AllSuspicionsFilter(SuspicionFilter):
+class SuperFilter(SuspicionFilter):
     @staticmethod
     def filter(suspicion):
         raise NotImplementedError("subclass and implement static filter method")

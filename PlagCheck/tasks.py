@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 import os
+import logging
 
 from celery import Celery
 
@@ -12,8 +13,10 @@ from django.db.utils import OperationalError
 
 from PlagCheck.models import Reference, Result, Suspicion, Document
 
-from PlagCheck.util.filter import filter_suspicion, load_suspicion_filters, AllSuspicionsFilter
+from PlagCheck.util.filter import filter_suspicion, load_suspicion_filters, SuperFilter
 import sherlock
+
+logger = logging.getLogger('PlagCheck')
 
 app = Celery('AuroraProject')
 
@@ -107,7 +110,7 @@ def check(self, **kwargs):
 
                 (suspicion_state, reason) = filter_suspicion(suspicion, suspicion_filters)
 
-                if suspicion.state and issubclass(suspicion_state, AllSuspicionsFilter):
+                if issubclass(reason, SuperFilter):
                     filter_all = True
                     all_suspicions_state = suspicion_state
 
@@ -115,7 +118,11 @@ def check(self, **kwargs):
 
         for suspicion, suspicion_state, reason in suspicions:
             new_suspicion_state = suspicion_state
+
+            print(suspicion.__dict__)
+
             if filter_all:
+                print('super filter')
                 new_suspicion_state = all_suspicions_state
 
             if new_suspicion_state is not None:

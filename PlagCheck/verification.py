@@ -5,18 +5,8 @@ from PlagCheck.util.filter import filter_suspicion, load_suspicion_filters
 from PlagCheck import tasks as plagcheck_tasks
 
 
-def plagcheck_store_and_verify(store_only=False, dry=False, **kwargs):
-    doc = plagcheck_store(dry, **kwargs)
-
-    if not store_only:
-        plagcheck_verify(doc)
-
-    return doc
-
-
 def plagcheck_verify(doc):
-    if doc:
-        plagcheck_tasks.check.delay(doc_id=doc.id)
+    return plagcheck_tasks.check.delay(doc_id=doc.id)
 
 
 def plagcheck_check_unverified():
@@ -28,19 +18,22 @@ def plagcheck_check_unverified():
         plagcheck_verify(doc)
 
 
-def plagcheck_store(dry_run=False, **kwargs):
-    doc = None
-
+def plagcheck_store(dry_run=False, always_create=False, **kwargs):
     if kwargs['submission_time'] in (None, 'None'):
         return None
 
-    try:
-        doc = Document.objects.get(
-            elaboration_id=kwargs['elaboration_id'],
-            user_id=kwargs['user_id'],
-            is_revised=kwargs.get('is_revised', False),
-        )
+    doc = None
+    if not always_create:
+        try:
+            doc = Document.objects.get(
+                elaboration_id=kwargs['elaboration_id'],
+                user_id=kwargs['user_id'],
+                is_revised=kwargs.get('is_revised', False),
+            )
+        except ObjectDoesNotExist:
+            doc = None
 
+    if doc:
         # skip verification if latest version already stored
         if str(doc.submission_time) == str(kwargs['submission_time']):
             return None
@@ -51,9 +44,8 @@ def plagcheck_store(dry_run=False, **kwargs):
             updated_doc.save()
 
         doc = updated_doc
-
-    except ObjectDoesNotExist:
-        if not dry_run:
+    else:
+        if not dry_run or always_create:
             doc = Document.objects.create(**kwargs)
         else:
             doc = object()
@@ -67,7 +59,7 @@ def plagcheck_elaboration(elaboration, store_only=False):
         if username is None:
             username = elaboration.user.username
 
-        doc = plagcheck_store_and_verify(
+        doc = plagcheck_store(
             store_only=store_only,
 
             text=elaboration.elaboration_text,
@@ -79,7 +71,7 @@ def plagcheck_elaboration(elaboration, store_only=False):
         )
 
         if elaboration.elaboration_text != elaboration.revised_elaboration_text:
-            doc = plagcheck_store_and_verify(
+            doc = plagcheck_store(
                 store_only=store_only,
 
                 text=elaboration.revised_elaboration_text,
@@ -89,6 +81,9 @@ def plagcheck_elaboration(elaboration, store_only=False):
                 submission_time=str(elaboration.submission_time),
                 is_revised=True,
             )
+
+        if not store_only:
+            plagcheck_verify(doc)
 
         return doc
 
