@@ -24,8 +24,13 @@ def readlines(f):
         if len(s) == 0:
             if len(line) > 0:
                 yield line
+                line = []
             return
-        if s == b'\r':
+        if s == b'\n':
+            if len(line) > 0:
+                yield line
+                line = []
+        elif s == b'\r':
             t = f.read(1)
             if t == b'\n':
                 if len(line) > 0:
@@ -61,12 +66,13 @@ def import_from_csv(csv_file, dry_run=False):
                     user_name=elab['user'],
                     submission_time=elab['submission_time'],
                     is_revised=False,
+                    is_filter=False,
                 )
                 done = True
 
             except OperationalError:
                 pass
-            except ValidationError:
+            except ValidationError as e:
                 doc = None
                 done = True
 
@@ -93,6 +99,7 @@ def read_elaborations_from_csv(csv_file, begin_at=0):
     elaborations = []
     with open(csv_file, "rb") as f:
         for bytelist in readlines(f):
+            #print(bytelist)
             line = b''.join(bytelist).decode("utf-8")
 
             if i <= begin_at:
