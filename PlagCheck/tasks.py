@@ -4,7 +4,7 @@ import os
 import logging
 
 from celery import Celery
-from copy import deepcopy
+from celery.utils.log import get_task_logger
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AuroraProject.settings')
@@ -12,12 +12,13 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'AuroraProject.settings')
 from django.conf import settings
 from django.db.utils import OperationalError
 
+
 from PlagCheck.models import Reference, Result, Suspicion, Document, SuspicionState
 
 from PlagCheck.util.filter import filter_suspicion, load_suspicion_filters, SuperFilter
 import sherlock
 
-logger = logging.getLogger('PlagCheck')
+logger = get_task_logger('PlagCheck')
 
 app = Celery('AuroraProject')
 
@@ -58,6 +59,7 @@ def check(self, **kwargs):
     """
     try:
         suspect_doc = Document.objects.get(pk=kwargs['doc_id'])
+        update_existing_suspicions = kwargs.pop('update_existing_suspicions', False)
 
         # delete existing references to older versions of this document
         Reference.remove_references(suspect_doc.id)
@@ -111,7 +113,8 @@ def check(self, **kwargs):
 
                 (suspicion_state, reason) = filter_suspicion(suspicion, suspicion_filters)
 
-                if issubclass(reason, SuperFilter):
+                if reason and issubclass(reason, SuperFilter):
+                    logger.debug("SuperFilter ruling over all others.")
                     is_dominated_by_super_state = True
                     super_state = suspicion_state
 
@@ -123,23 +126,29 @@ def check(self, **kwargs):
             if is_dominated_by_super_state:
                 new_state = super_state
 
-            try:
-                existing_suspicion = Suspicion.objects.get(
+            if update_existing_suspicions:
+                existing_suspicion = Suspicion.objects.filter(
                     suspect_doc_id=suspicion.suspect_doc_id,
                     similar_doc_id=suspicion.similar_doc_id,
-                )
-                logging.DEBUG('Found existing suspicion, updating it')
+                ).order_by('-id').first()
 
-                if new_state is not None:
-                    existing_suspicion.state = new_state.value
-                    existing_suspicion.save()
+                if existing_suspicion:
+                    if new_state is not None:
+                        if existing_suspicion.state != new_state.value:
+                            existing_suspicion.state = new_state.value
+                            existing_suspicion.save()
+                    else:
+                        existing_suspicion.state = SuspicionState.NOT_SUSPECTED.value
+                        existing_suspicion.save()
+
                 else:
-                    existing_suspicion.state = SuspicionState.NOT_SUSPECTED.value
-
-            except Suspicion.DoesNotExist:
+                    if new_state is not None:
+                        suspicion.state = new_state.value
+                        suspicion.save()
+            else:
                 if new_state is not None:
-                    suspicion.state = new_state.value
-                    suspicion.save()
+                        suspicion.state = new_state.value
+                        suspicion.save()
 
         return result.celery_result()
     except OperationalError as e:

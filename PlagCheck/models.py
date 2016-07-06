@@ -235,8 +235,8 @@ class Reference(models.Model):
     suspect_doc = models.ForeignKey(Document)
 
     # TODO: this causes a integrity error when inserting hashes, why?
-    # class Meta:
-    #    unique_together = (("hash", "suspect_doc"),)
+    class Meta:
+        unique_together = (("hash", "suspect_doc"),)
 
     def __unicode__(self):
         return self.hash

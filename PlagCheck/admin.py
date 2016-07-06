@@ -42,6 +42,8 @@ class SuspicionAdmin(PlagCheckModelAdmin):
 class DocumentAdmin(PlagCheckModelAdmin):
     list_display = ('id', 'elaboration_id')
 
+    search_fields = ('id', 'elaboration_id')
+
 
 admin.site.register(Document, DocumentAdmin)
 admin.site.register(Reference, ReferenceAdmin)

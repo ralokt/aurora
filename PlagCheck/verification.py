@@ -5,8 +5,11 @@ from PlagCheck.util.filter import filter_suspicion, load_suspicion_filters
 from PlagCheck import tasks as plagcheck_tasks
 
 
-def plagcheck_verify(doc):
-    return plagcheck_tasks.check.delay(doc_id=doc.id)
+def plagcheck_verify(doc, update_existing_suspicions=False):
+    return plagcheck_tasks.check.delay(
+        doc_id=doc.id,
+        update_existing_suspicions=update_existing_suspicions
+    )
 
 
 def plagcheck_check_unverified():

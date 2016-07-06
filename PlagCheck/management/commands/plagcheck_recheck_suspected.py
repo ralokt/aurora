@@ -13,4 +13,4 @@ class Command(BaseCommand):
         suspicions = list(Suspicion.objects.filter(Q(state=SuspicionState.SUSPECTED.value) | Q(state=SuspicionState.SUSPECTED_SELF_PLAGIARISM.value)))
 
         for suspicion in suspicions:
-            plagcheck_verify(suspicion.suspect_doc)
+            plagcheck_verify(suspicion.suspect_doc, update_existing_suspicions=True)

@@ -21,37 +21,38 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        if len(args) > 0:
+            for arg in args:
+                with open(arg, 'r') as f:
+                    content = f.read()
 
-        with open(args[0], 'r') as f:
-            content = f.read()
+                doc = plagcheck_store(
+                    always_create=True,
 
-        doc = plagcheck_store(
-            always_create=True,
+                    elaboration_id=0,
+                    text=content,
+                    user_id=0,
+                    user_name='document',
+                    submission_time=datetime.now(),
+                    is_filter=options['filter'],
+                )
 
-            elaboration_id=0,
-            text=content,
-            user_id=0,
-            user_name='document',
-            submission_time=datetime.now(),
-            is_filter=options['filter'],
-        )
+                result_dict = plagcheck_verify(doc).wait()
 
-        result_dict = plagcheck_verify(doc).wait()
+                out = {}
 
-        out = {}
+                result = Result.objects.get(pk=result_dict['id'])
 
-        result = Result.objects.get(pk=result_dict['id'])
+                suspicions = Suspicion.objects.filter(result=result)
 
-        suspicions = Suspicion.objects.filter(result=result)
+                out['result'] = model_to_dict(result)
 
-        out['result'] = model_to_dict(result)
+                out['suspicions'] = []
+                for suspicion in suspicions:
+                    suspicion_dict = model_to_dict(suspicion)
 
-        out['suspicions'] = []
-        for suspicion in suspicions:
-            suspicion_dict = model_to_dict(suspicion)
+                    suspicion_dict['similar_doc'] = model_to_dict(suspicion.similar_doc)
 
-            suspicion_dict['similar_doc'] = model_to_dict(suspicion.similar_doc)
+                    out['suspicions'].append(suspicion_dict)
 
-            out['suspicions'].append(suspicion_dict)
-
-        pprint(out)
+                pprint(out)
