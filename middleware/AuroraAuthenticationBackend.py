@@ -18,12 +18,10 @@ class AuroraAuthenticationBackend(ModelBackend):
             if user.check_password(password):
                 return user
         except UserModel.DoesNotExist:
-            # Run the default password hasher once to reduce the timing
-            # difference between an existing and a non-existing user (#20760).
-            UserModel().set_password(password)
+            return ModelBackend.authenticate(self, username=username, password=password, **kwargs)
 
     def get_user(self, user_id):
         try:
-            return AuroraUser.objects.get(pk=user_id)
+            return AuroraUser._default_manager.get(pk=user_id)
         except User.DoesNotExist:
             return None
