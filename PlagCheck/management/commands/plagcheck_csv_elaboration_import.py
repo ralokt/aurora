@@ -4,7 +4,42 @@ from django.core.exceptions import ValidationError
 from Challenge.models import Challenge
 from PlagCheck.verification import *
 from sys import stdout
+from django.db import connections
+from PlagCheck.util.settings import PlagCheckSettings
 
+
+"""
+SQL queries
+
+2014 Data
+----------
+COPY (SELECT elab.id, elab.user_id, challenge.title, usr.matriculation_number, elab.creation_time, elab.submission_time, elab.elaboration_text FROM "Elaboration_elaboration" elab, "Challenge_challenge" challenge, "PortfolioUser_portfoliouser" usr, "Course_course" course WHERE elab.user_id = usr.user_ptr_id AND elab.challenge_id = challenge.id) TO '/tmp/aurora_2014.pgsql.bin' BINARY;
+
+2015 Data
+----------
+COPY (SELECT elab.id, elab.user_id, challenge.title, usr.matriculation_number, elab.creation_time, elab.submission_time, elab.elaboration_text FROM "Elaboration_elaboration" elab, "Challenge_challenge" challenge, "AuroraUser_aurorauser" usr, "Course_course" course WHERE elab.user_id = usr.user_ptr_id AND elab.challenge_id = challenge.id) TO '/tmp/aurora_2015.pgsql.bin' BINARY;
+
+"""
+
+aurora_2014_export_query = """
+    COPY (
+      SELECT
+        elab.id,
+        elab.user_id,
+        challenge.title,
+        usr.matriculation_number,
+        elab.creation_time,
+        elab.submission_time,
+        elab.elaboration_text
+      FROM
+        "Elaboration_elaboration" elab,
+        "Challenge_challenge" challenge,
+        "PortfolioUser_portfoliouser" usr
+      WHERE
+        elab.user_id = usr.user_ptr_id
+      AND elab.challenge_id = challenge.id
+      ) TO '/tmp/aurora_2014.csv' BINARY;
+    """
 
 class Command(BaseCommand):
     help = 'Populates database with demo data'
@@ -14,7 +49,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         #force_csv_import(options['csv'])
-        import_from_csv(args[0])
+        import_from_binary(args[0])
 
 
 def readlines(f):
@@ -31,6 +66,7 @@ def readlines(f):
                 yield line
                 line = []
         elif s == b'\r':
+        #if s == b'\r':
             t = f.read(1)
             if t == b'\n':
                 if len(line) > 0:
@@ -40,6 +76,73 @@ def readlines(f):
                 line.append(t)
         else:
             line.append(s)
+
+def import_from_binary(binary_file, dry_run=False):
+    import_query = """
+            DROP TABLE IF EXISTS imported_tmp;
+            CREATE TEMPORARY TABLE imported_2014 (
+              id INT,
+              user_id INT,
+              title TEXT,
+              matriculation_number TEXT,
+              creation_time TIMESTAMP,
+              submission_time TIMESTAMP,
+              elaboration_text TEXT
+            );
+            COPY imported_2014 (
+              id,
+              user_id,
+              title,
+              matriculation_number,
+              creation_time,
+              submission_time,
+              elaboration_text
+            ) FROM %s BINARY;
+            SELECT
+              id,
+              user_id,
+              title,
+              matriculation_number,
+              creation_time,
+              submission_time,
+              elaboration_text
+            FROM imported_2014;
+            """
+    cursor = connections[PlagCheckSettings.database].cursor()
+
+    cursor.execute(import_query, [binary_file])
+
+    count_valid=0
+    count_invalid=0
+    for row in cursor.fetchall():
+        try:
+            doc = plagcheck_store(
+                dry_run=dry_run,
+                elaboration_id=row[0],
+                user_id=row[1],
+                user_name=row[3],
+                submission_time=row[5],
+                text=row[6]
+            )
+        except ValidationError:
+            doc = None
+
+        if doc:
+            count_valid += 1
+        else:
+            count_invalid += 1
+
+        #percent = (100.0 / count_total) * (count_valid + count_invalid)
+        percent = 0
+
+        stdout.write("\r{0:6.2f}% {1:10} valid, {2:10} invalid or already added".format(percent, count_valid, count_invalid))
+        stdout.flush()
+
+    stdout.write("\n")
+
+    print("Checking all unverified documents ...")
+    if not dry_run:
+        plagcheck_check_unverified()
 
 
 def import_from_csv(csv_file, dry_run=False):
