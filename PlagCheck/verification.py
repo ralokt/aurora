@@ -32,6 +32,7 @@ def plagcheck_store(dry_run=False, always_create=False, **kwargs):
                 elaboration_id=kwargs['elaboration_id'],
                 user_id=kwargs['user_id'],
                 is_revised=kwargs.get('is_revised', False),
+                submission_time=kwargs['submission_time'],
             )
         except ObjectDoesNotExist:
             doc = None
