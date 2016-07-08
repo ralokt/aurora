@@ -25,6 +25,9 @@ def plagcheck_store(dry_run=False, always_create=False, **kwargs):
     if kwargs['submission_time'] in (None, 'None'):
         return None
 
+    if kwargs['user_name'] in (None, 'None'):
+        return None
+
     doc = None
     if not always_create:
         try:
