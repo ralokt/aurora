@@ -250,10 +250,14 @@ class Reference(models.Model):
             pass
 
     @staticmethod
-    def store_references(suspect_doc_id, hash_list):
+    def store_references(suspect_doc_id, hash_list, is_filter=False):
         with transaction.atomic():
-            for h in hash_list:
-                Reference.objects.create(hash=h, suspect_doc_id=suspect_doc_id)
+            if not is_filter:
+                for h in hash_list:
+                    Reference.objects.create(hash=h, suspect_doc_id=suspect_doc_id)
+            else:
+                for h in hash_list:
+                    FilterReference.objects.create(hash=h, suspect_doc_id=suspect_doc_id)
 
     @staticmethod
     def get_similar_elaborations(suspect_doc_id):
@@ -276,6 +280,9 @@ class Reference(models.Model):
                            ') as "suspicion" '
                        'INNER JOIN "PlagCheck_reference" as "similar" ON "suspicion".hash="similar".hash '
                        'WHERE "similar".suspect_doc_id != %s '
+                       'AND "similar".hash NOT IN ( '
+                           'SELECT DISTINCT("PlagCheck_filterreference".hash) FROM "PlagCheck_filterreference"'
+                       ')'
                        'GROUP BY "similar".suspect_doc_id ', [suspect_doc_id, suspect_doc_id])
 
         ret = list()
@@ -285,3 +292,6 @@ class Reference(models.Model):
         return ret
 
 
+class FilterReference(models.Model):
+    hash = models.CharField(db_index=True, max_length=255)
+    suspect_doc = models.ForeignKey(Document)

@@ -63,8 +63,6 @@ def plagcheck_elaboration(elaboration, store_only=False):
             username = elaboration.user.username
 
         doc = plagcheck_store(
-            store_only=store_only,
-
             text=elaboration.elaboration_text,
             elaboration_id=elaboration.id,
             user_id=elaboration.user.id,
@@ -75,8 +73,6 @@ def plagcheck_elaboration(elaboration, store_only=False):
 
         if elaboration.elaboration_text != elaboration.revised_elaboration_text:
             doc = plagcheck_store(
-                store_only=store_only,
-
                 text=elaboration.revised_elaboration_text,
                 elaboration_id=elaboration.id,
                 user_id=elaboration.user.id,

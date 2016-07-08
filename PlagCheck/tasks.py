@@ -30,7 +30,7 @@ app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 suspicion_filters = load_suspicion_filters()
 
 
-class PlagcheckError(Exception):
+class PlagcheckError(BaseException):
     def __init__(self, msg):
         self.msg = msg
 
@@ -84,7 +84,7 @@ def check(self, **kwargs):
         suspicions = list()
         if hash_count > 0:
             # store (new) references
-            Reference.store_references(suspect_doc.id, hash_set)
+            Reference.store_references(suspect_doc.id, hash_set, is_filter=suspect_doc.is_filter)
 
             # compute individual similarity by computing the count
             # of matches for each other document. This returns a list
