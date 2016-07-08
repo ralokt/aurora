@@ -35,6 +35,7 @@ class Command(BaseCommand):
                     user_name='document',
                     submission_time=datetime.now(),
                     is_filter=options['filter'],
+                    challenge="imported",
                 )
 
                 result_dict = plagcheck_verify(doc).wait()

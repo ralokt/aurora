@@ -36,6 +36,7 @@ class Document(models.Model):
     submission_time = models.DateTimeField(null=True)
     is_revised = models.BooleanField(null=False, default=False)
     is_filter = models.BooleanField(null=False, default=False)
+    challenge = models.CharField(null=False, max_length=100, default="")
 
     def get_elaboration(self):
         return Elaboration.objects.get(pk=self.elaboration_id)
@@ -62,6 +63,7 @@ class Document(models.Model):
         info['User ID'] = self.user_id
         info['Elaboration ID'] = self.elaboration_id
         info['Submission time'] = self.submission_time
+        info['Challenge'] = self.challenge
 
         return info
     document_info = property(get_document_info)

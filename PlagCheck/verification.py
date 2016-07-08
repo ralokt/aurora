@@ -73,6 +73,7 @@ def plagcheck_elaboration(elaboration, store_only=False):
             user_name=username,
             submission_time=str(elaboration.submission_time),
             is_revised=False,
+            challenge=elaboration.challenge.title,
         )
 
         if elaboration.elaboration_text != elaboration.revised_elaboration_text:
@@ -83,6 +84,7 @@ def plagcheck_elaboration(elaboration, store_only=False):
                 user_name=username,
                 submission_time=str(elaboration.submission_time),
                 is_revised=True,
+                challenge=elaboration.challenge.title,
             )
 
         if not store_only:

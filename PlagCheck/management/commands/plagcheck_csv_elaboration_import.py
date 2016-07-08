@@ -15,7 +15,7 @@ SQL queries
 ----------
 COPY (SELECT elab.id, elab.user_id, challenge.title, usr.matriculation_number, elab.creation_time, elab.submission_time, elab.elaboration_text FROM "Elaboration_elaboration" elab, "Challenge_challenge" challenge, "PortfolioUser_portfoliouser" usr, "Course_course" course WHERE elab.user_id = usr.user_ptr_id AND elab.challenge_id = challenge.id) TO '/tmp/aurora_2014.pgsql.bin' BINARY;
 
-2015 Data
+2015/2016 Data
 ----------
 COPY (SELECT elab.id, elab.user_id, challenge.title, usr.matriculation_number, elab.creation_time, elab.submission_time, elab.elaboration_text FROM "Elaboration_elaboration" elab, "Challenge_challenge" challenge, "AuroraUser_aurorauser" usr, "Course_course" course WHERE elab.user_id = usr.user_ptr_id AND elab.challenge_id = challenge.id) TO '/tmp/aurora_2015.pgsql.bin' BINARY;
 
@@ -120,9 +120,10 @@ def import_from_binary(binary_file, dry_run=False):
                 dry_run=dry_run,
                 elaboration_id=row[0],
                 user_id=row[1],
+                challenge=row[2],
                 user_name=row[3],
                 submission_time=row[5],
-                text=row[6]
+                text=row[6],
             )
         except ValidationError:
             doc = None
@@ -168,8 +169,7 @@ def import_from_csv(csv_file, dry_run=False):
                     user_id=0,
                     user_name=elab['user'],
                     submission_time=elab['submission_time'],
-                    is_revised=False,
-                    is_filter=False,
+                    challenge=elab['challenge']
                 )
                 done = True
 
@@ -214,7 +214,7 @@ def read_elaborations_from_csv(csv_file, begin_at=0):
             try:
                 elab = dict()
                 elab['id'] = int(data[0])
-                elab['challange'] = data[1]
+                elab['challenge'] = data[1]
                 elab['user'] = data[2]
                 elab['created'] = data[3]
                 elab['submission_time'] = data[4]
