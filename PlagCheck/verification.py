@@ -28,34 +28,16 @@ def plagcheck_store(dry_run=False, always_create=False, **kwargs):
     if kwargs['user_name'] in (None, 'None'):
         return None
 
-    doc = None
-    if not always_create:
-        try:
-            doc = Document.objects.get(
-                elaboration_id=kwargs['elaboration_id'],
-                user_id=kwargs['user_id'],
-                is_revised=kwargs.get('is_revised', False),
-                submission_time=kwargs['submission_time'],
-            )
-        except ObjectDoesNotExist:
-            doc = None
-
-    if doc:
-        # skip verification if latest version already stored
-        if str(doc.submission_time) == str(kwargs['submission_time']):
-            return None
-
-        updated_doc = Document(pk=doc.pk, **kwargs)
-
+    try:
+        doc = Document.objects.get(
+            elaboration_id=kwargs['elaboration_id'],
+            user_id=kwargs['user_id'],
+            is_revised=kwargs.get('is_revised', False),
+            submission_time=kwargs['submission_time'],
+        )
+    except ObjectDoesNotExist:
         if not dry_run:
-            updated_doc.save()
-
-        doc = updated_doc
-    else:
-        if not dry_run or always_create:
             doc = Document.objects.create(**kwargs)
-        else:
-            doc = object()
 
     return doc
 

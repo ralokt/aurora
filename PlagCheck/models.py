@@ -213,22 +213,6 @@ class Suspicion(models.Model):
 
         return elaborations
 
-    @staticmethod
-    def suspicion_list_by_request(request, course):
-
-        kwargs = {
-            #'suspect_doc__submission_time__gt': course.start_date,
-        }
-
-        state_filter = request.GET.get('state', None)
-        if state_filter is not None:
-            state_filter = int(state_filter)
-            if state_filter >= 0:
-                #suspicion_list = suspicion_list.filter(state=state_filter)
-                kwargs['state'] = state_filter
-
-        return kwargs
-
 
 class Reference(models.Model):
     """
