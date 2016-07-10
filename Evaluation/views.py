@@ -850,7 +850,8 @@ def similarities(request, course_short_title=None):
 
     suspicions_html = render_plagcheck_suspicion_list(request, course,
                                                       extra_list_filters=extra_filter,
-                                                      is_embedded_in_details=True
+                                                      is_embedded_in_details=True,
+                                                      filters_from_session=False
                                                       )
 
     return HttpResponse(suspicions_html)

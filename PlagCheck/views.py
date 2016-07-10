@@ -11,10 +11,10 @@ def query_dict_from_session(request, key):
         ret = QueryDict(mutable=True)
         ret.update(content)
         return ret
-    return None
+    return QueryDict(mutable=True)
 
 
-def update_query_dict(target, update):
+def update_query_dict(target, update, only=[]):
 
     assert isinstance(target, QueryDict), "target argument has to be a QueryDict()"
     target._assert_mutable()
@@ -24,7 +24,11 @@ def update_query_dict(target, update):
         _update = QueryDict(mutable=True)
         _update.update(update)
 
-    for key in update.keys():
+    keys = update.keys()
+    if len(only) > 0:
+        keys = only
+
+    for key in keys:
         if key in target:
             target.setlist(key, list(set(target.getlist(key) + _update.getlist(key))))
         else:
@@ -38,49 +42,49 @@ def is_query_dict_equal(dictA, dictB, exclude=[]):
     for key in exclude:
         try:
             del dictA_copy[key]
-        except ValueError:
+        except KeyError:
             pass
 
         try:
             del dictB_copy[key]
-        except ValueError:
+        except KeyError:
             pass
 
     return dictA_copy == dictB_copy
 
 
-def suspicion_filters_from_request(request, extra_list_filters={}):
+def suspicion_filters_from_request(request, from_session=True, extra_list_filters={}):
 
     suspicion_query_filter = SuspicionQueryFilter(request.GET, queryset=Suspicion.objects.all())
 
     # ensure filter data is a mutable QueryDict
-    print("suspicion_query_filter.data: " + str(suspicion_query_filter.data))
     if not isinstance(suspicion_query_filter.data, QueryDict):
-        print("create instance")
         suspicion_query_filter.data = QueryDict(mutable=True)
     else:
         suspicion_query_filter.data = suspicion_query_filter.data.copy()
 
-    session_filter = query_dict_from_session(request, 'suspicion_filter_querydict')
-    print("session_filter: " + str(session_filter))
-    print("suspicion_query_filter.data: " + str(suspicion_query_filter.data.copy()))
-    if session_filter:
-        update_query_dict(suspicion_query_filter.data, session_filter)
-        # check if filter has been changed
-        if not is_query_dict_equal(session_filter, suspicion_query_filter.data, exclude=['page']):
-            suspicion_query_filter.data['page'] = 1
+    if is_query_dict_equal(suspicion_query_filter.data, {}, exclude=['page']):
+        session_filter = query_dict_from_session(request, 'suspicion_filter_querydict')
 
-    print(suspicion_query_filter.data)
-    request.session['suspicion_filter_querydict'] = suspicion_query_filter.data.copy()
+        if 'page' in suspicion_query_filter.data:
+            session_filter['page'] = suspicion_query_filter.data['page']
+            request.session['suspicion_filter_querydict'] = session_filter
+
+        if from_session:
+            suspicion_query_filter.data = session_filter
+    else:
+        request.session['suspicion_filter_querydict'] = suspicion_query_filter.data.copy()
 
     update_query_dict(suspicion_query_filter.data, extra_list_filters)
 
     return suspicion_query_filter
 
 
-def render_plagcheck_suspicion_list(request, course, extra_list_filters={}, is_embedded_in_details=False):
+def render_plagcheck_suspicion_list(request, course, extra_list_filters={}, is_embedded_in_details=False, filters_from_session=True):
 
-    suspicion_query_filter = suspicion_filters_from_request(request, extra_list_filters)
+    suspicion_query_filter = suspicion_filters_from_request(request,
+                                                            from_session=filters_from_session,
+                                                            extra_list_filters=extra_list_filters)
 
     count = suspicion_query_filter.count()
 
