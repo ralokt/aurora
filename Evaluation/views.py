@@ -846,9 +846,12 @@ def get_points(request, user, course):
 def similarities(request, course_short_title=None):
     course = Course.get_or_raise_404(short_title=course_short_title)
 
-    elaboration_id = request.session.get('elaboration_id')
+    extra_filter = {'suspect_elaboration_id': request.session['elaboration_id']}
 
-    suspicions_html = render_plagcheck_suspicion_list(request, course, suspect_elaboration_id=elaboration_id)
+    suspicions_html = render_plagcheck_suspicion_list(request, course,
+                                                      extra_list_filters=extra_filter,
+                                                      is_embedded_in_details=True
+                                                      )
 
     return HttpResponse(suspicions_html)
 

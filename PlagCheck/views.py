@@ -14,20 +14,21 @@ def query_dict_from_session(request, key):
     return None
 
 
-def merge_query_dict(query_dict_A, query_dict_B):
+def update_query_dict(target, update):
 
-    assert isinstance(query_dict_B, QueryDict), "update argument has to be a QueryDict()"
+    assert isinstance(target, QueryDict), "target argument has to be a QueryDict()"
+    target._assert_mutable()
 
-    merged = QueryDict(mutable=True)
-    merged.update(query_dict_A)
+    _update = update
+    if not isinstance(_update, QueryDict):
+        _update = QueryDict(mutable=True)
+        _update.update(update)
 
-    for key in query_dict_B.keys():
-        if key in merged:
-            merged.setlist(key, list(set(query_dict_A.getlist(key) + query_dict_B.getlist(key))))
+    for key in update.keys():
+        if key in target:
+            target.setlist(key, list(set(target.getlist(key) + _update.getlist(key))))
         else:
-            merged.setlist(key, query_dict_B.getlist(key))
-
-    return merged
+            target.setlist(key, _update.getlist(key))
 
 
 def is_query_dict_equal(dictA, dictB, exclude=[]):
@@ -48,55 +49,38 @@ def is_query_dict_equal(dictA, dictB, exclude=[]):
     return dictA_copy == dictB_copy
 
 
-def suspicion_filters_from_request(request, course, elaboration_id=None):
+def suspicion_filters_from_request(request, extra_list_filters={}):
 
-    filter_args = request.session.get('suspicion_filter_args', {})
+    suspicion_query_filter = SuspicionQueryFilter(request.GET, queryset=Suspicion.objects.all())
 
-    filter_args['suspect_doc__submission_time__year'] = 2016
-    filter_args['similar_doc__submission_time__year'] = 2014
-
-    state_filter = request.GET.get('state', None)
-    if state_filter is not None:
-        state_filter = int(state_filter)
-        if state_filter >= 0:
-            filter_args['state'] = state_filter
-            request.session['suspicion_page_number'] = 1
-        else:
-            if 'state' in filter_args:
-                del filter_args['state']
-
-    request.session['suspicion_filter_args'] = filter_args
-
-    if elaboration_id:
-        filter_args['suspect_doc__elaboration_id'] = elaboration_id
-        request.session['suspicion_page_number'] = 1
+    # ensure filter data is a mutable QueryDict
+    print("suspicion_query_filter.data: " + str(suspicion_query_filter.data))
+    if not isinstance(suspicion_query_filter.data, QueryDict):
+        print("create instance")
+        suspicion_query_filter.data = QueryDict(mutable=True)
     else:
-        if request.GET.get('page', None) is not None:
-            request.session['suspicion_page_number'] = int(request.GET.get('page'))
-
-    page = request.session.get('suspicion_page_number', 1)
-
-    return (filter_args, page)
-
-
-def render_plagcheck_suspicion_list(request, course, suspect_elaboration_id=None):
-
-    queryset = Suspicion.objects.all()
-    is_embedded_in_details = False
-    if suspect_elaboration_id:
-        is_embedded_in_details = True
-        queryset.filter(suspect_doc__elaboration_id=suspect_elaboration_id)
-
-    suspicion_query_filter = SuspicionQueryFilter(request.GET, queryset=queryset)
+        suspicion_query_filter.data = suspicion_query_filter.data.copy()
 
     session_filter = query_dict_from_session(request, 'suspicion_filter_querydict')
+    print("session_filter: " + str(session_filter))
+    print("suspicion_query_filter.data: " + str(suspicion_query_filter.data.copy()))
     if session_filter:
-        suspicion_query_filter.data = merge_query_dict(suspicion_query_filter.data, session_filter)
+        update_query_dict(suspicion_query_filter.data, session_filter)
         # check if filter has been changed
         if not is_query_dict_equal(session_filter, suspicion_query_filter.data, exclude=['page']):
             suspicion_query_filter.data['page'] = 1
 
+    print(suspicion_query_filter.data)
     request.session['suspicion_filter_querydict'] = suspicion_query_filter.data.copy()
+
+    update_query_dict(suspicion_query_filter.data, extra_list_filters)
+
+    return suspicion_query_filter
+
+
+def render_plagcheck_suspicion_list(request, course, extra_list_filters={}, is_embedded_in_details=False):
+
+    suspicion_query_filter = suspicion_filters_from_request(request, extra_list_filters)
 
     count = suspicion_query_filter.count()
 
@@ -117,9 +101,9 @@ def render_plagcheck_suspicion_list(request, course, suspect_elaboration_id=None
 def render_plagcheck_compare(request, course, suspicion_id):
 
     suspicion = Suspicion.objects.get(pk=suspicion_id)
-    (filter_args, page_number) = suspicion_filters_from_request(request, course)
+    suspicion_query_filter = suspicion_filters_from_request(request)
 
-    (prev_suspicion_id, next_suspicion_id) = suspicion.get_prev_next(**filter_args)
+    (prev_suspicion_id, next_suspicion_id) = suspicion.get_prev_next_by_queryset(suspicion_query_filter.qs)
 
     context = {
         'course': course,

@@ -12,9 +12,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import *
 import django_filters
 from django.forms.widgets import HiddenInput
+from django.utils.encoding import force_text
+from django.db.models.query import Q
 
 from Elaboration.models import Elaboration
-
 from PlagCheck.util.state import SuspicionState
 from PlagCheck.util.settings import PlagCheckSettings
 
@@ -173,7 +174,23 @@ class Suspicion(models.Model):
         """
         self.state = SuspicionState(int(value)).value
 
-    def get_prev_next(self, **filter_args):
+    def _get_next_or_previous_by_FIELD_by_queryset(self, field, is_next, queryset):
+        if not self.pk:
+            raise ValueError("get_next/get_previous cannot be used on unsaved objects.")
+        op = 'gt' if is_next else 'lt'
+        order = '' if is_next else '-'
+        param = force_text(getattr(self, field.attname))
+        q = Q(**{'%s__%s' % (field.name, op): param})
+        q = q | Q(**{field.name: param, 'pk__%s' % op: self.pk})
+        qs = queryset.filter(q).order_by(
+            '%s%s' % (order, field.name), '%spk' % order
+        )
+        try:
+            return qs[0]
+        except IndexError:
+            raise self.DoesNotExist("%s matching query does not exist." % self.__class__._meta.object_name)
+
+    def get_prev_next_by_kwargs(self, **filter_args):
         """
         Provides the ids to the next and previous Suspect object.
         :return: Tuple (previous_id, next_id)
@@ -187,6 +204,27 @@ class Suspicion(models.Model):
         prev_id = None
         try:
             prev_id = self.get_previous_by_created(**filter_args).id
+        except ObjectDoesNotExist:
+            pass
+
+        return (prev_id, next_id)
+
+    def get_prev_next_by_queryset(self, queryset):
+        """
+        Provides the ids to the next and previous Suspect object.
+        :return: Tuple (previous_id, next_id)
+        """
+
+        field = Suspicion._meta.get_field('created')
+        next_id = None
+        try:
+            next_id = self._get_next_or_previous_by_FIELD_by_queryset(field, True, queryset).id
+        except ObjectDoesNotExist:
+            pass
+
+        prev_id = None
+        try:
+            prev_id = self._get_next_or_previous_by_FIELD_by_queryset(field, False, queryset).id
         except ObjectDoesNotExist:
             pass
 
