@@ -22,8 +22,12 @@ class SuspicionState(IntEnum):
         return states
 
     @staticmethod
-    def choices():
+    def choices(with_empty=False):
         choices = ()
+
+        if with_empty:
+            choices = ('', '-----------------'),
+
         for state in SuspicionState:
             choices += ((state.value, state.name),)
         return choices

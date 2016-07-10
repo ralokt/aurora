@@ -256,7 +256,7 @@ class Suspicion(models.Model):
 class SuspicionQueryFilter(django_filters.FilterSet):
     suspect_doc_year = django_filters.NumberFilter(name="suspect_doc__submission_time", lookup_expr='year')
     similar_doc_year = django_filters.NumberFilter(name="similar_doc__submission_time", lookup_expr='year')
-    state = django_filters.ChoiceFilter(choices=SuspicionState.choices())
+    state = django_filters.ChoiceFilter(choices=SuspicionState.choices(with_empty=True))
     suspect_elaboration_id = django_filters.NumberFilter(name="suspect_doc__elaboration_id", widget=HiddenInput())
     similar_elaboration_id = django_filters.NumberFilter(name="similar_doc__elaboration_id", widget=HiddenInput())
 
