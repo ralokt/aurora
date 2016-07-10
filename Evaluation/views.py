@@ -848,7 +848,7 @@ def similarities(request, course_short_title=None):
 
     elaboration_id = request.session.get('elaboration_id')
 
-    suspicions_html = render_plagcheck_suspicion_list(request, course, elaboration_id)
+    suspicions_html = render_plagcheck_suspicion_list(request, course, suspect_elaboration_id=elaboration_id)
 
     return HttpResponse(suspicions_html)
 

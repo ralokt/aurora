@@ -1,4 +1,4 @@
-Django==1.7
+Django==1.9
 Pillow==2.5.3
 coverage==3.7.1
 distribute
@@ -7,6 +7,7 @@ psycopg2==2.6.1
 six==1.4.1
 django-taggit==0.19.1
 django-suit==0.2.18
+django-filters==0.13.0
 
 # plugcheck at aurora side
 django-celery==3.1.17

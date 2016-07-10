@@ -10,6 +10,8 @@ from django.db.models import Lookup
 from django.db.models.fields import Field
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.encoding import *
+import django_filters
+from django.forms.widgets import HiddenInput
 
 from Elaboration.models import Elaboration
 
@@ -113,7 +115,6 @@ class Document(models.Model):
         return docs
 
 
-
 class Result(models.Model):
     """Stores the result of a check of one document.
     """
@@ -212,6 +213,18 @@ class Suspicion(models.Model):
                 elaborations.append(elaboration)
 
         return elaborations
+
+
+class SuspicionQueryFilter(django_filters.FilterSet):
+    suspect_doc_year = django_filters.NumberFilter(name="suspect_doc__submission_time", lookup_expr='year')
+    similar_doc_year = django_filters.NumberFilter(name="similar_doc__submission_time", lookup_expr='year')
+    state = django_filters.ChoiceFilter(choices=SuspicionState.choices())
+    suspect_elaboration_id = django_filters.NumberFilter(name="suspect_doc__elaboration_id", widget=HiddenInput())
+    similar_elaboration_id = django_filters.NumberFilter(name="similar_doc__elaboration_id", widget=HiddenInput())
+
+    class Meta:
+        model = Suspicion
+        fields = ['state']
 
 
 class Reference(models.Model):
