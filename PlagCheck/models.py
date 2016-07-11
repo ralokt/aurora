@@ -75,6 +75,7 @@ class Document(models.Model):
         info = OrderedDict()
 
         info['# hashes'] = self.result_set.order_by('-created').all()[0].hash_count
+        info['Is revised'] = self.is_revised
 
         return info
     plagcheck_info = property(get_plagcheck_info)
