@@ -25,7 +25,7 @@
         {% paginate suspicions starting from page page_number %}
         {% for suspicion in suspicions %}
             <tr class="{% cycle 'darkRow' 'lightRow' %}"
-                onclick="window.open('{% url 'Evaluation:plagcheck_compare' course_short_title=course.short_title suspicion_id=suspicion.id %}?{{ request.GET.urlencode }}' {% if is_embedded_in_details %} ,'_blank' {% else %}, '_self' {% endif %})">&nbsp;
+                onclick="window.open('{% url 'Evaluation:plagcheck_compare' course_short_title=course.short_title suspicion_id=suspicion.id %}' {% if is_embedded_in_details %} ,'_blank' {% else %}, '_self' {% endif %})">&nbsp;
                 <td><img class="gravatar" src="{{ suspicion.suspect_doc.user.avatar.url }}" style="vertical-align:middle"> {{ suspicion.suspect_doc.user.nickname }}</td>
                 <td>{{ suspicion.suspect_doc.elaboration.challenge.title|safe }}</td>
                 <td>{{ suspicion.similarity }}</td>
