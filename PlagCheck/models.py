@@ -259,6 +259,8 @@ class SuspicionQueryFilter(django_filters.FilterSet):
     state = django_filters.ChoiceFilter(choices=SuspicionState.choices(with_empty=True))
     suspect_elaboration_id = django_filters.NumberFilter(name="suspect_doc__elaboration_id", widget=HiddenInput())
     similar_elaboration_id = django_filters.NumberFilter(name="similar_doc__elaboration_id", widget=HiddenInput())
+    suspect_user = django_filters.CharFilter(name="suspect_doc__user_name")
+    similar_user = django_filters.CharFilter(name="suspect_doc__user_name")
 
     class Meta:
         model = Suspicion
