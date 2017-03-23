@@ -21,6 +21,7 @@ import logging
 
 logger = logging.getLogger('review')
 
+
 class Elaboration(models.Model):
     challenge = models.ForeignKey('Challenge.Challenge')
     user = models.ForeignKey('AuroraUser.AuroraUser')
@@ -33,7 +34,7 @@ class Elaboration(models.Model):
     tags = TaggableManager()
     comments = GenericRelation(Comment)
     extra_review_question = models.TextField(default='')
-    
+
     def __str__(self):
         return str(self.id)
 
@@ -95,7 +96,8 @@ class Elaboration(models.Model):
         return True
 
     def get_challenge_elaborations(self):
-        elaborations = Elaboration.objects.filter(challenge=self.challenge, submission_time__isnull=False)
+        elaborations = Elaboration.objects.filter(
+            challenge=self.challenge, submission_time__isnull=False)
         if elaborations.exists():
             return elaborations
         return False
@@ -119,7 +121,8 @@ class Elaboration(models.Model):
         if not final_challenge:
             return False
 
-        final_challenge_elaboration = final_challenge.get_elaboration(self.user)
+        final_challenge_elaboration = final_challenge.get_elaboration(
+            self.user)
         if final_challenge_elaboration and final_challenge_elaboration.is_submitted():
             return False
 
@@ -133,7 +136,7 @@ class Elaboration(models.Model):
         return ContentType.objects.get_for_model(self).id
 
     def add_tags_from_text(self, text):
-        tags = text.split(',');
+        tags = text.split(',')
         tags = [tag.lower().strip() for tag in tags]
         self.tags.add(*tags)
 
@@ -199,23 +202,25 @@ class Elaboration(models.Model):
     def get_extra_reviews(user, course):
         from Challenge.models import Challenge
 
-        user_submitted_challenge_ids = Elaboration.objects.filter(user_id=user.id, submission_time__isnull=False).values_list('challenge_id', flat=True)
+        user_submitted_challenge_ids = Elaboration.objects.filter(
+            user_id=user.id, submission_time__isnull=False).values_list('challenge_id', flat=True)
 
         final_challenge_ids = Challenge.get_course_final_challenge_ids(course)
-        already_written_review_elaboration_ids = Review.objects.filter(reviewer_id=user.id).values_list('elaboration_id', flat=True)
+        already_written_review_elaboration_ids = Review.objects.filter(
+            reviewer_id=user.id).values_list('elaboration_id', flat=True)
 
         missing_reviews = (
             Elaboration.objects
-                .annotate(num_reviews=Count('review'))
-                .filter(challenge__id__in=user_submitted_challenge_ids,
-                        submission_time__isnull=False,
-                        user__is_staff=False,
-                        challenge__course=course,
-                        num_reviews__lt=2)
-                .exclude(challenge__id__in=final_challenge_ids)
-                .exclude(id__in=already_written_review_elaboration_ids)
-                .exclude(user=user)
-                .order_by('num_reviews', 'submission_time')
+            .annotate(num_reviews=Count('review'))
+            .filter(challenge__id__in=user_submitted_challenge_ids,
+                    submission_time__isnull=False,
+                    user__is_staff=False,
+                    challenge__course=course,
+                    num_reviews__lt=2)
+            .exclude(challenge__id__in=final_challenge_ids)
+            .exclude(id__in=already_written_review_elaboration_ids)
+            .exclude(user=user)
+            .order_by('num_reviews', 'submission_time')
         )
 
         missing_reviews = list(missing_reviews)
@@ -223,15 +228,15 @@ class Elaboration(models.Model):
 
         # Add Open Reviews to top of list
         has_open_review = False
-        open_reviews = Review.objects.filter(submission_time__isnull=True, reviewer=user)
+        open_reviews = Review.objects.filter(
+            submission_time__isnull=True, reviewer=user)
         for review in open_reviews:
             print(review.id)
             has_open_review = True
             missing_reviews = [review.elaboration] + missing_reviews
 
-        return { 'has_open_review': has_open_review, 'missing_reviews': missing_reviews[:7] }
+        return {'has_open_review': has_open_review, 'missing_reviews': missing_reviews[:7]}
         # return missing_reviews[:7]
-
 
     @staticmethod
     def get_top_level_tasks(course):
@@ -268,7 +273,8 @@ class Elaboration(models.Model):
         from Challenge.models import Challenge
 
         final_challenge_ids = Challenge.get_course_final_challenge_ids(course)
-        possible_user_ids = CourseUserRelation.objects.filter(course=course, positive_completion_possible=True).values_list('user_id', flat=True)
+        possible_user_ids = CourseUserRelation.objects.filter(
+            course=course, positive_completion_possible=True).values_list('user_id', flat=True)
 
         final_top_level_challenges = (
             Elaboration.objects
@@ -298,42 +304,38 @@ class Elaboration(models.Model):
 
     @staticmethod
     def get_non_adequate_work(course):
-
-        """
-        alle non adequate elaborations für deren final challenge es noch keine abgegebene evaluation gibt
-
-        von allen submitted evaluations nimm den user und den stack
-        für jeden stack nimm alle elaborations für den jeweiligen user
-
-        nimm alle non adequate elaborations und exclude die vorher gefundenen elaborations
-        """
-        non_adequate_elaborations = Elaboration.get_non_adequate_elaborations(course).prefetch_related('challenge')
-
-        submitted_evaluations = (
-            Evaluation.objects
-            .filter(submission_time__isnull=False)
-            .values_list('submission__user', 'submission__challenge__stackchallengerelation__stack__id')
+        from AuroraUser.models import AuroraUser
+        negative_reviews = (
+            Review.objects
+            .filter(appraisal=Review.NOTHING, submission_time__isnull=False)
+            .prefetch_related('elaboration')
+            .values_list('elaboration__id', flat=True)
         )
 
+        elaborations = Elaboration.objects.filter(id__in=negative_reviews, submission_time__isnull=False, user__is_staff=False,
+                challenge__course=course).exclude(user_id__in=AuroraUser.dummy_user_ids())
 
-        stack_lookup = {}
-        for user, stack in submitted_evaluations:
-            if not stack in stack_lookup:
-                stack_lookup[stack] = [user]
-            elif not user in stack_lookup[stack]:
-                stack_lookup[stack].append(user)
-        exclude_elaboration_ids = []
-        for stack, users in stack_lookup.items():
-            exclude_elaboration_ids = exclude_elaboration_ids + list(
-                Elaboration.objects
-                .filter(challenge__stackchallengerelation__stack__id=stack, user_id__in=users)
-                .values_list('id', flat=True)
-            )
-        return non_adequate_elaborations.exclude(id__in=exclude_elaboration_ids)
+        return elaborations
+
+    @staticmethod
+    def get_non_adequate_dummy_work(course):
+        from AuroraUser.models import AuroraUser
+        negative_reviews = (
+            Review.objects
+            .filter(appraisal=Review.NOTHING, submission_time__isnull=False)
+            .prefetch_related('elaboration')
+            .values_list('elaboration__id', flat=True)
+        )
+
+        elaborations = Elaboration.objects.filter(id__in=negative_reviews, submission_time__isnull=False, user__is_staff=False,
+                challenge__course=course, user_id__in=AuroraUser.dummy_user_ids())
+
+        return elaborations
 
     @staticmethod
     def get_evaluated_non_adequate_work(course):
-        non_adequate_elaborations = Elaboration.get_non_adequate_elaborations(course).prefetch_related('challenge')
+        non_adequate_elaborations = Elaboration.get_non_adequate_elaborations(
+            course).prefetch_related('challenge')
 
         submitted_evaluations = (
             Evaluation.objects
@@ -356,8 +358,6 @@ class Elaboration(models.Model):
             )
         return Elaboration.objects.filter(id__in=include_elaboration_ids).filter(id__in=non_adequate_elaborations)
 
-
-
     @staticmethod
     def get_review_candidate(challenge, user):
         review_group = user.review_group(challenge.course)
@@ -371,7 +371,8 @@ class Elaboration(models.Model):
     @staticmethod
     def get_random_review_candidate(challenge, user):
         # Wait x hours before making elaborations available for review
-        offset = randint(ReviewConfig.get_candidate_offset_min(), ReviewConfig.get_candidate_offset_max())
+        offset = randint(ReviewConfig.get_candidate_offset_min(),
+                         ReviewConfig.get_candidate_offset_max())
         threshold = datetime.now() - timedelta(hours=offset)
 
         # Exclude elaborations the user has already submitted a review for
@@ -391,11 +392,11 @@ class Elaboration(models.Model):
             .exclude(id__in=already_submitted_reviews_ids)
         ).order_by('num_reviews')
 
-
         # Separate candidates
         old_enough_candidates, newer_candidates = [], []
         for candidate in candidates:
-            old_enough_candidates.append(candidate) if candidate.submission_time < threshold else newer_candidates.append(candidate)
+            old_enough_candidates.append(
+                candidate) if candidate.submission_time < threshold else newer_candidates.append(candidate)
 
         if len(old_enough_candidates) > 0:
             chosen_candidate = old_enough_candidates[0]
@@ -412,7 +413,7 @@ class Elaboration(models.Model):
             ).order_by('num_reviews')
             chosen_candidate = candidates[0]
 
-        return { 'chosen_by': 'random', 'candidate': chosen_candidate }
+        return {'chosen_by': 'random', 'candidate': chosen_candidate}
 
     @staticmethod
     def get_lower_karma_review_candidate(challenge, user):
@@ -427,8 +428,10 @@ class Elaboration(models.Model):
         )
 
         # Find users within karma distances
-        current_user       = CourseUserRelation.objects.get(course=challenge.course, active=True, user=user)
-        all_possible_users = CourseUserRelation.objects.filter(course=challenge.course, active=True).order_by('review_karma')
+        current_user = CourseUserRelation.objects.get(
+            course=challenge.course, active=True, user=user)
+        all_possible_users = CourseUserRelation.objects.filter(
+            course=challenge.course, active=True).order_by('review_karma')
 
         current_user_index = list(all_possible_users).index(current_user)
 
@@ -454,29 +457,31 @@ class Elaboration(models.Model):
         ).order_by('num_reviews')
 
         if candidates.count() == 0:
-            logger.error('[FALLBACK] No lower-karma candidates for ' + str(user.id) + ' / ' + challenge.title)
+            logger.error('[FALLBACK] No lower-karma candidates for ' +
+                         str(user.id) + ' / ' + challenge.title)
             return Elaboration.get_random_review_candidate(challenge, user)
 
         if user.has_enough_special_reviews(challenge):
-            logger.info('[ENOUGH REVIEWS] User ' + str(user.id) + ' has already written 2 lower-karma reviews for ' + challenge.title)
+            logger.info('[ENOUGH REVIEWS] User ' + str(user.id) +
+                        ' has already written 2 lower-karma reviews for ' + challenge.title)
             return Elaboration.get_random_review_candidate(challenge, user)
 
         candidate = candidates[0]
         if candidate.number_of_reviews() >= 2:
-            logger.info('[ENOUGH REVIEWS] All Elaboration already have 2 or more reviews, falling back to random')
+            logger.info(
+                '[ENOUGH REVIEWS] All Elaboration already have 2 or more reviews, falling back to random')
             return Elaboration.get_random_review_candidate(challenge, user)
 
-        user_karma      = user.review_karma(challenge.course)
+        user_karma = user.review_karma(challenge.course)
         candidate_karma = candidate.user.review_karma(challenge.course)
 
         logger.info('[LOWER] number of lower-karma candidates: ' + str(candidates.count()) +
                     ', user/karma ' + str(user.id) + '/' + str(user_karma) +
-                    ', candidate_user/candidate_karma: ' + str(candidate.user.id) + '/'  + str(candidate_karma) +
+                    ', candidate_user/candidate_karma: ' + str(candidate.user.id) + '/' + str(candidate_karma) +
                     ', challenge: ' + challenge.title
                     )
 
-        return { 'chosen_by': 'lower-karma', 'candidate': candidates[0] }
-
+        return {'chosen_by': 'lower-karma', 'candidate': candidates[0]}
 
     @staticmethod
     def get_similar_karma_review_candidate(challenge, user):
@@ -491,8 +496,10 @@ class Elaboration(models.Model):
         )
 
         # Find users within karma distances
-        current_user       = CourseUserRelation.objects.get(course=challenge.course, active=True, user=user)
-        all_possible_users = CourseUserRelation.objects.filter(course=challenge.course, active=True).order_by('review_karma')
+        current_user = CourseUserRelation.objects.get(
+            course=challenge.course, active=True, user=user)
+        all_possible_users = CourseUserRelation.objects.filter(
+            course=challenge.course, active=True).order_by('review_karma')
 
         current_user_index = list(all_possible_users).index(current_user)
 
@@ -514,23 +521,27 @@ class Elaboration(models.Model):
         )
 
         if candidates.count() == 0:
-            logger.error('[FALLBACK] No similar-karma candidates for ' + str(user.id) + ' / ' + challenge.title)
+            logger.error('[FALLBACK] No similar-karma candidates for ' +
+                         str(user.id) + ' / ' + challenge.title)
             return Elaboration.get_random_review_candidate(challenge, user)
 
         if user.has_enough_special_reviews(challenge):
-            logger.info('[ENOUGH REVIEWS] User ' + str(user.id) + ' has already written 2 similar-karma reviews for ' + challenge.title)
+            logger.info('[ENOUGH REVIEWS] User ' + str(user.id) +
+                        ' has already written 2 similar-karma reviews for ' + challenge.title)
             return Elaboration.get_random_review_candidate(challenge, user)
 
         # Sort candidates based on review karma
         candidates = list(candidates)
-        candidates.sort(key=lambda elaboration: elaboration.user.review_karma(challenge.course))
+        candidates.sort(
+            key=lambda elaboration: elaboration.user.review_karma(challenge.course))
 
         # Separate them into users with lower and higher karma than the current user
         # The separated list are already sorted by karma
         user_karma = user.review_karma(challenge.course)
         lower_candidates, higher_candidates = [], []
         for candidate in candidates:
-            lower_candidates.append(candidate) if candidate.user.review_karma(challenge.course) <= user_karma else higher_candidates.append(candidate)
+            lower_candidates.append(candidate) if candidate.user.review_karma(
+                challenge.course) <= user_karma else higher_candidates.append(candidate)
 
         lower_candidates.reverse()
 
@@ -541,25 +552,28 @@ class Elaboration(models.Model):
         else:
             zipped_candidates = zip(lower_candidates, higher_candidates)
             zipped_candidates = list(zipped_candidates)
-            flat_candidates = [item for sublist in zipped_candidates for item in sublist] # This is some serious wtf#
+            # This is some serious wtf#
+            flat_candidates = [
+                item for sublist in zipped_candidates for item in sublist]
 
         if len(flat_candidates) > 1:
             # Choose one of the first 2 candidates at random
-            # Candidate at [0] is the closest avaiable candidate with lower karma while candidate at [1] is the closest with higher karma
-            candidate = flat_candidates[randint(0,1)]
+            # Candidate at [0] is the closest avaiable candidate with lower
+            # karma while candidate at [1] is the closest with higher karma
+            candidate = flat_candidates[randint(0, 1)]
         else:
             candidate = flat_candidates[0]
 
-        user_karma      = user.review_karma(challenge.course)
+        user_karma = user.review_karma(challenge.course)
         candidate_karma = candidate.user.review_karma(challenge.course)
 
         logger.info('[SIMILAR] number of similar candidates: ' + str(len(candidates)) +
                     ', user/karma ' + str(user.id) + '/' + str(user_karma) +
-                    ', candidate_user/candidate_karma: ' + str(candidate.user.id) + '/'  + str(candidate_karma) +
+                    ', candidate_user/candidate_karma: ' + str(candidate.user.id) + '/' + str(candidate_karma) +
                     ', challenge: ' + challenge.title
                     )
 
-        return { 'chosen_by': 'similar-karma', 'candidate': candidate }
+        return {'chosen_by': 'similar-karma', 'candidate': candidate}
 
     def get_success_reviews(self):
         return Review.objects.filter(elaboration=self, submission_time__isnull=False, appraisal=Review.SUCCESS)
@@ -609,7 +623,8 @@ class Elaboration(models.Model):
             .filter(appraisal=Review.AWESOME, submission_time__isnull=False)
             .values_list('elaboration__id', flat=True)
         )
-        multiple_awesome_review_ids = ([k for k,v in Counter(awesome_review_ids).items() if v>1])
+        multiple_awesome_review_ids = (
+            [k for k, v in Counter(awesome_review_ids).items() if v > 1])
         awesome_elaborations = (
             Elaboration.objects
             .filter(id__in=multiple_awesome_review_ids, challenge__course=course, user__is_staff=False)
@@ -623,7 +638,8 @@ class Elaboration(models.Model):
             .filter(appraisal=Review.AWESOME, submission_time__isnull=False)
             .values_list('elaboration__id', flat=True)
         )
-        multiple_awesome_review_ids = ([k for k,v in Counter(awesome_review_ids).items() if v>1])
+        multiple_awesome_review_ids = (
+            [k for k, v in Counter(awesome_review_ids).items() if v > 1])
         awesome_elaborations = (
             Elaboration.objects
             .filter(id__in=multiple_awesome_review_ids, challenge=challenge, challenge__course=course,

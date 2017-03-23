@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^reviewlist/$', Evaluation.views.reviewlist, name='reviews'),
     url(r'^missing_reviews$', Evaluation.views.missing_reviews, name='missing_reviews'),
     url(r'^non_adequate_work$', Evaluation.views.non_adequate_work, name='non_adequate_work'),
+    url(r'^non_adequate_dummy_work$', Evaluation.views.non_adequate_dummy_work, name='non_adequate_dummy_work'),
     url(r'^top_level_tasks$', Evaluation.views.top_level_tasks, name='top_level_tasks'),
     url(r'^final_evaluation_top_level_tasks$', Evaluation.views.final_evaluation_top_level_tasks, name='final_evaluation_top_level_tasks'),
     url(r'^complaints$', Evaluation.views.complaints, name='complaints'),

@@ -244,6 +244,20 @@ class AuroraUser(User):
     def query_tagged(tags):
         return AuroraUser.objects.filter(tags__name__in=tags)
 
+    @staticmethod
+    def dummy_users():
+        all_user_ids = AuroraUser.objects.all().values_list('id', flat=True)
+        enlisted_and_active_ids = CourseUserRelation.objects.all().values_list('user_id', flat=True)
+        dummy_ids = list(set(all_user_ids) - set(enlisted_and_active_ids))
+
+        return AuroraUser.objects.filter(id__in=dummy_ids)
+
+    @staticmethod
+    def dummy_user_ids():
+        all_user_ids = AuroraUser.objects.all().values_list('id', flat=True)
+        enlisted_and_active_ids = CourseUserRelation.objects.all().values_list('user_id', flat=True)
+        return list(set(all_user_ids) - set(enlisted_and_active_ids))
+
     @property
     def display_name(self):
         display_name = self.username if self.nickname is None else self.nickname
