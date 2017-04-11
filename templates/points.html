@@ -230,31 +230,31 @@
                     {% endif %}
                     )">
               <script>document.write(br)</script>%
-              as »Good« (&empty; is {{review_evaluations_good_ratio|floatformat:"0"}}%)
+              as »OK« (&empty; is {{review_evaluations_good_ratio|floatformat:"0"}}%)
             </span>
             <br>
             <span
-                style="color:rgba(255,0,0,
+                style="color:rgba(199,164,31,
                     {% if review_evaluation_data.bad_review_evaluations == 0 %}
-                      0.5
+                      0.65
                     {% else %}
                       1
                     {% endif %}
                     )">
               <script>document.write(cr)</script>%
-              as »Bad« (&empty; is {{review_evaluations_bad_ratio|floatformat:"0"}}%)
+              as »Meaningless« (&empty; is {{review_evaluations_bad_ratio|floatformat:"0"}}%)
             </span>
             <br>
             <span
                 style="color:rgba(255,0,0,
-                    {% if review_evaluation_data.negatve_review_evaluations == 0 %}
+                    {% if review_evaluation_data.negative_review_evaluations == 0 %}
                       0.5
                     {% else %}
                       1
                     {% endif %}
                     )">
-              <script>document.write(cr)</script>%
-              as »Negative« (&empty; is {{review_evaluations_negative_ratio|floatformat:"0"}}%)
+              <script>document.write(dr)</script>%
+              as »Minimalist/offensive« (&empty; is {{review_evaluations_negative_ratio|floatformat:"0"}}%)
             </span>
           </td>
         </tr>

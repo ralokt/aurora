@@ -12,9 +12,9 @@
 <div>
   <div class="pagehead">
     <div class="headline">
-	  <div class="course_selected" onclick="location.href='/'"><span style="">Aurora - </span>
+	  <div class="course_selected"><a href="/"><span style="">Aurora - </span>
 		  <span class="long_title_text">{{course.title}}</span>
-		  <span class="short_title_text">{{course.short_title}}</span></div>
+		  <span class="short_title_text">{{course.short_title}}</span><a></div>
     </div>	
     {% if user.is_authenticated %}
 
@@ -39,7 +39,7 @@
 		{% endif %}
 
         <li id="bugs-li">
-          <a href="https://piratenpad.de/p/tr4m3bj6" target="_blank">Bugs &amp; Feedback</a>
+          <a href={% url 'Feedback:index' course.short_title %}>Bugs &amp; Feedback</a>
         </li>
 
         {% if user.is_staff %}
@@ -56,44 +56,44 @@
         </li>
       </ul>
 
-	  <div class="user_info" style="background-image:url('{{ user.avatar.url }}')" onclick="window.location='{% url 'User:profile' course.short_title %}'">
+	  <a href="{% url 'User:profile' course.short_title %}"><div class="user_info" style="background-image:url('{{ user.avatar.url }}')">
 		  <div class="user_nick">{{user.nickname}}</div>
 		  <div class="profile_link">Click to edit</div>
-	  </div>
+	  </div></a>
   	<a class="logout_button" id="button_sign_out" href="{% url 'User:signout' course.short_title %}">Sign out</a>
 
   </div>
   <div class="pagebottom">
       <ul>
          <li id="feed-li-bottom">
-            <a href="{% url 'home' course.short_title %}"><i class="fa fa-newspaper-o "></i></a></li>
+            <a href="{% url 'home' course.short_title %}"><i class="fa fa-newspaper-o "></i><div class="icontext">News</div></a></li>
 
 		{% if "1" %}
         <li id="challenges-li-bottom">
-          <a href="{% url 'Challenge:home' course.short_title %}"><i class="fa fa-pencil "></i></a></li>
+          <a href="{% url 'Challenge:home' course.short_title %}"><i class="fa fa-pencil "></i><div class="icontext">Challenges</div></a></li>
 		{% else %}
         <li id="challenges-li-bottom" style="color:#666" title="Der Zugang zu Challenges ist mehr möglich, weil die Einführungs-Challenge nicht abgegeben wurde.">
-          <s>Challenges</s></li>
+          <i class="fa fa-pencil" style=" color:gray"></li>
 		{% endif %}
 
         <li id="slides-li-bottom">
-          <a href="{% url 'Slides:slides' course.short_title %}"><i class="fa fa-tv "></i></a></li>
+          <a href="{% url 'Slides:slides' course.short_title %}"><i class="fa fa-tv "></i><div class="icontext">Slides</div></a></li>
 			
 		{% if course.short_title == "gsi" %}
 	        <li id="diskurs-li-bottom">
-	          <a href="{% url 'diskurs:index' course.short_title %}"><i class="fa fa-comment-o "></i></a></li>
+	          <a href="{% url 'diskurs:index' course.short_title %}"><i class="fa fa-comment-o "></i><div class="icontext">Diskurs</div></a></li>
 		{% endif %}
 
         <li id="bugs-li-bottom">
-          <a href="https://piratenpad.de/p/tr4m3bj6" target="_blank"><i class="fa fa-bug "></i></a>
+          <a href={% url 'Feedback:index' course.short_title %}><i class="fa fa-bug "></i><div class="icontext">Feedback</div></a>
         </li>
 
         {% if user.is_staff %}
-          <li id="evaluation-li-bottom"><a href="{% url 'Evaluation:home' course.short_title %}"><i class="fa fa-star-half-empty"></i></a></li>
+          <li id="evaluation-li-bottom"><a href="{% url 'Evaluation:home' course.short_title %}"><i class="fa fa-star-half-empty"></i><div class="icontext">Eval</div></a></li>
         {% endif %}
 
         {% if user.is_superuser %}
-          <li id="statistics-li-bottom"><a href="{% url 'Statistics:home' course.short_title %}"><i class="fa fa-bar-chart"></i></a></li>
+          <li id="statistics-li-bottom"><a href="{% url 'Statistics:home' course.short_title %}"><i class="fa fa-bar-chart"></i><div class="icontext">Stats</div></a></li>
         {% endif %}
         <li id="notifications-li-bottom" class="unread_notifications">
           <a id="unread_notifications_bottom"  class="unread_notifications_display" href="{% url 'Notification:list' course.short_title %}">{{ unread_notifications|length }}</a>
