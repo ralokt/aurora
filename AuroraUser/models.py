@@ -241,6 +241,13 @@ class AuroraUser(User):
         self.avatar = os.path.join(self.upload_path, filename)
         self.save()
 
+    def get_all_reviews(self, course):
+        return Review.objects.filter(reviewer=self, elaboration__challenge__course=course)
+
+    def get_reviewed_elaborations(self, course):
+        reviewed_elaboration_ids = Review.objects.filter(reviewer=self, elaboration__challenge__course=course).distinct('elaboration__challenge_id').values_list('elaboration_id', flat=True)
+        return Elaboration.objects.filter(id__in=reviewed_elaboration_ids)
+
     def get_content_type_id(self):
         return ContentType.objects.get_for_model(self).id
 

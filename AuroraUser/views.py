@@ -220,3 +220,22 @@ def create_feed_token(request, course_short_title):
     }
 
     return HttpResponse(json.dumps(data), content_type="application/json")
+
+@aurora_login_required()
+def all_reviews(request, course_short_title):
+    user = request.user
+    course = Course.get_or_raise_404(course_short_title)
+    reviewed_elaborations = user.get_reviewed_elaborations(course)
+
+    reviewed_stack_elaborations = {}
+
+    for elaboration in reviewed_elaborations:
+        stack_name = elaboration.challenge.get_stack().title
+        reviewed_stack_elaborations.setdefault(stack_name, []).append(elaboration)
+
+    data = {
+        'course': course,
+        'reviewed_stack_elaborations': reviewed_stack_elaborations
+    }
+
+    return render_to_response('reviews.html', data, context_instance=RequestContext(request))
