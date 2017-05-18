@@ -26,6 +26,10 @@
         <div style="display:inline-block;float:right;margin-top:1.5px;background:#c0c0c0;color:white;position:relative;right:5px;padding:3px 6px;">
           <a href="#review-{{ review.id }}" rel="modal:open"> View Elaboration </a>
         </div>
+        <br>
+        <div style="display:inline-block;float:right;margin-top:1.5px;position:relative;right:-8px;padding:3px 6px;">
+          {% include 'elaboration_indicators.html' with elaboration=review.elaboration %}
+        </div>
 			</div>
 	   		 <div class="author_detail hidden_detail" id="r_detail{{forloop.counter}}{{review.id}}" onclick="$('.author_detail').addClass('hidden_detail');$('#r_detail{{forloop.counter}}{{review.id}}').addClass('hidden_detail')">
 	   			 <img src='{{review.reviewer.avatar.url}}'>
@@ -65,7 +69,8 @@
           <br><br>
 		</div>
 
-    <div id="review-{{ review.id }}" style="display:none;">
+    <div id="review-{{ review.id }}" class="modal-elaboration" style="display:none;">
+      {% include 'user_info.html' with user=review.elaboration.user %}
       {% render_original_uploads review.elaboration %}
       {% if review.elaboration.elaboration_text  %}
         <div class="submitted-content">
@@ -78,7 +83,7 @@
           <h1>Revised Work</h1>
           {% if review.elaboration.revised_elaboration_changelog %}
             <b>Changelog: </b>{{ review.elaboration.revised_elaboration_changelog }}<br>
-            Most helpful user was <b>user ID {{ review.elaboration.most_helpful_other_user }}</b> (i know, this is next to useless...)<br><br>
+            <b>{{ elaboration.most_helpful_other_user_text }}</b> helped me the most to improve my work<br><br>
           {% endif %}
 
           {% render_revised_uploads review.elaboration %}
@@ -87,6 +92,7 @@
               <trix-editor class="trix-content" input="evaluation-revised-editor-{{ review.id }}"></trix-editor>
           </div>
       {% endif %}
+      {% include 'elaboration_indicators.html' with elaboration=review.elaboration %}
     </div>
     {% endfor %}
 

@@ -116,7 +116,7 @@ class Elaboration(models.Model):
             return False
 
         final_challenge = self.challenge.get_final_challenge()
-        if not final_challenge:
+        if self == final_challenge:
             return False
 
         final_challenge_elaboration = final_challenge.get_elaboration(self.user)
@@ -139,6 +139,18 @@ class Elaboration(models.Model):
 
     def remove_tag(self, tag):
         self.tags.remove(tag)
+
+    def most_helpful_other_user_text(self):
+        user_id = self.most_helpful_other_user
+
+        if user_id == -1:
+            return "Someone from the LVA Team"
+        elif user_id == -99:
+            return "The work I reviewed"
+        else:
+            from AuroraUser.models import AuroraUser
+            user = AuroraUser.objects.get(id=user_id)
+            return user.first_name + " " + user.last_name + " (" + user.nickname + "/" + str(user.matriculation_number) + ")"
 
     @staticmethod
     def get_sel_challenge_elaborations(challenge):
