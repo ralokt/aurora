@@ -30,6 +30,8 @@ urlpatterns = [
     url(r'^remove_tag/$', views.remove_tag),
     url(r'^autocomplete_tag/$', views.autocomplete_tag),
 
+    url(r'^plagcheck/', include('PlagCheck.urls', namespace='PlagCheck')),
+
     url(r'^(?P<course_short_title>(gsi|hci))/', include([
         url(r'^$', views.home, name='home'),
         url(r'^challenge/', include('Challenge.urls', namespace='Challenge')),
