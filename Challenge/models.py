@@ -76,6 +76,9 @@ class Challenge(models.Model):
     def __str__(self):
         return u'%s' % self.title
 
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__, self.id)
+
     def get_course(self):
         return self.course
 
@@ -148,7 +151,7 @@ class Challenge(models.Model):
         )
         return final_challenge_ids
 
-    # @memoize(timeout=2)
+    @memoize(timeout=2)
     def is_final_challenge(self):
         final_challenge = self.get_final_challenge()
 
@@ -157,7 +160,7 @@ class Challenge(models.Model):
 
         return False
 
-    # @memoize(timeout=2)
+    @memoize(timeout=2)
     def get_first_challenge(self):
 
         first = Challenge.objects.raw('''
@@ -174,7 +177,7 @@ class Challenge(models.Model):
         ''', [self.id])
         return first[0]
 
-    # @memoize(timeout=2)
+    @memoize(timeout=2)
     def get_final_challenge(self):
         final = Challenge.objects.raw('''
             WITH RECURSIVE challenge_tree(id, prerequisite_id, depth) AS (
