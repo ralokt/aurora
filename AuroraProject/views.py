@@ -70,26 +70,27 @@ def home(request, course_short_title=None):
 
     user = AuroraAuthenticationBackend.get_user(AuroraAuthenticationBackend(), request.user.id)
     course = Course.get_or_raise_404(course_short_title)
-    data = get_points(request, user, course)
+    #data = get_points(request, user, course)
+    data = [] #testing only
     data = create_stat_data(course,data)
     data['user_is_top_reviewer'] = False
 
-    data['number_of_extra_reviews'] = user.number_of_extra_reviews(course)
-    data['reviews_until_next_extra_point'] = user.number_of_reviews_until_next_extra_point(course)
-    data['extra_points_earned_with_reviews'] = user.extra_points_earned_with_reviews(course)
-    if user.is_top_reviewer(course):
+    #data['number_of_extra_reviews'] = user.number_of_extra_reviews(course)
+    #data['reviews_until_next_extra_point'] = user.number_of_reviews_until_next_extra_point(course)
+    #data['extra_points_earned_with_reviews'] = user.extra_points_earned_with_reviews(course)
+    #if user.is_top_reviewer(course):
         # data['number_of_extra_reviews'] = user.number_of_extra_reviews(course)
         # data['reviews_until_next_extra_point'] = user.number_of_reviews_until_next_extra_point(course)
         # data['extra_points_earned_with_reviews'] = user.extra_points_earned_with_reviews(course)
-        data['user_is_top_reviewer'] = True
+        # data['user_is_top_reviewer'] = True
         # Expensive function, therefor only execute if user is top reviewer
-        data = get_extra_review_data(user, course, data)
+        # data = get_extra_review_data(user, course, data)
 
-    data['extra_points_earned_with_comments'] = user.extra_points_earned_with_comments(course)
-    data['extra_points_earned_by_rating_reviews'] = user.extra_points_earned_by_rating_reviews(course)
-    data['total_extra_points_earned'] = user.total_extra_points_earned(course)
+    #data['extra_points_earned_with_comments'] = user.extra_points_earned_with_comments(course)
+    #data['extra_points_earned_by_rating_reviews'] = user.extra_points_earned_by_rating_reviews(course)
+    #data['total_extra_points_earned'] = user.total_extra_points_earned(course)
     faq_list = Faq.get_faqs(course_short_title)
-    context = RequestContext(request, {'newsfeed': data['course'], 'faq_list': faq_list})
+    context = RequestContext(request, {'newsfeed': course, 'faq_list': faq_list})
 
     return render_to_response('home.html', data, context)
 
