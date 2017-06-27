@@ -72,8 +72,8 @@ def home(request, course_short_title=None):
     course = Course.get_or_raise_404(course_short_title)
     #data = get_points(request, user, course)
     data = [] #testing only
-    data = create_stat_data(course,data)
-    data['user_is_top_reviewer'] = False
+    #data = create_stat_data(course,data)
+    #data['user_is_top_reviewer'] = False
 
     #data['number_of_extra_reviews'] = user.number_of_extra_reviews(course)
     #data['reviews_until_next_extra_point'] = user.number_of_reviews_until_next_extra_point(course)
