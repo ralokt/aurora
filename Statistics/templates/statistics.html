@@ -136,10 +136,13 @@
 	</tr>
 		<tr>
 			<td colspan="2"><br>highest count</td>
-			<td style="text-align:center"><br>&#9899; you:
-		{% for tutor in tutors0|dictsortreversed:"all_evaluations" %}
-			{% if tutor.nickname = user.nickname %}{{tutor.all_evaluations}}{% endif %}
-		{% endfor %}
+			<td style="text-align:center"><br>
+			{% if not user.is_superuser %} 
+				&#9899; you:
+				{% for tutor in tutors0|dictsortreversed:"all_evaluations" %}
+					{% if tutor.nickname = user.nickname %}{{tutor.all_evaluations}}{% endif %}
+				{% endfor %}
+			{% endif %}
 			</td>
 			<td colspan="2" class="Raglin"><br>lowest count</td>
 	</table>

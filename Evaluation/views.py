@@ -28,6 +28,7 @@ from Stack.models import Stack
 from Notification.models import Notification
 from PlagCheck.views import render_to_string_compare_view, render_to_string_suspicions_view
 from middleware.AuroraAuthenticationBackend import AuroraAuthenticationBackend
+from functools import lru_cache
 
 
 @aurora_login_required()

@@ -36,12 +36,12 @@
                 <td>
 {% if user.is_superuser %}  
                   {%  if elaboration.user.avatar %}
-                  <img class="gravatar" src="{{ elaboration.user.avatar.url }}" style="vertical-align:middle">
+               	   <img class="gravatar" src="{{ elaboration.user.avatar.url }}" style="vertical-align:middle">
                     {%  endif %}
                   {{ elaboration.user.nickname }}
 {% else %}
                   <img class="gravatar" src="{{ STATIC_URL }}img/nobody.png" style="vertical-align:middle">
-			username anonymized
+			{{elaboration.user.matriculation_number}}
 {% endif %}
                 </td>
                 <td>{{ elaboration.challenge.title|safe }}</td>
