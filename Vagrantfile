@@ -6,7 +6,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provision "ansible_local" do |ansible|
-    ansible.playbook = "provision_vagrant_vm.yml"
+    ansible.playbook = "ansible/vagrant.yml"
   end
 
   config.vm.box = "centos/7"

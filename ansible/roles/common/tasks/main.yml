@@ -1,0 +1,67 @@
+---
+- name: add epel repo for extra packages from fedora
+  yum: name=epel-release
+
+- name: install nginx
+  yum: name=nginx
+
+- name: install python34
+  yum: name=python34
+
+- name: install python34-devel
+  yum: name=python34-devel
+
+- name: install python-devel
+  yum: python-devel
+
+- name: install libjpeg-devel
+  yum: libjpeg-devel
+
+- name: install zlib-devel
+  yum: zlib-devel
+
+- name: install python34-pip
+  yum: python34-pip
+
+- name: install postgresql96-devel
+  yum: postgresql96-devel
+
+- name: install postgresql96
+  yum: postgresql96
+
+- name: install postgresql96-server
+  yum: postgresql96-server
+
+- name: install postgresql96-contrib
+  yum: postgresql96-contrib
+
+- name: install uwsgi
+  yum: uwsgi
+
+- name: install uwsgi-plugin-python3
+  yum: uwsgi-plugin-python3
+
+- name: install uwsgi-logger-file
+  yum: uwsgi-logger-file
+
+- name: install rabbitmq-server
+  yum: rabbitmq-server
+
+
+
+          #python-devel libjpeg-devel zlib-devel # random python foo
+          #python34-pip # damit wir zeuchs für python 3.4 installieren können
+          #https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm # offizieles pgsql repo für postgres server
+          #postgresql96-devel postgresql96 postgresql96-server # postgres 9.6 server
+          #uwsgi uwsgi-plugin-python3 uwsgi-logger-file # uwsgi
+          #postgresql96-contrib # pakete, die ich zuerst vergessen hatte
+          #gcc # brauchte ich für irgendwas
+          #system-storage-manager # erleichtert das arbeiten mit raid volumes
+          #rabbitmq-server # rabbit mq foo
+          #monit # mmonit installieren
+          #net-tools # brauchte ich für debugging
+          #ntp # notwendig wegen timesync zu tu time servern, weil sonst sso clusterfucken kann
+          #vim # on request. i use nano, like any good psychopath
+          #sysreporter # um sysreports für backupninja zu generieren
+          #cryptsetup # ???
+          #pg_activity # debugging
