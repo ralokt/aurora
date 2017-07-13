@@ -2,6 +2,9 @@
 - name: add epel repo for extra packages from fedora
   yum: name=epel-release
 
+- name: install vim
+  yum: name=vim
+
 - name: install nginx
   yum: name=nginx
 
