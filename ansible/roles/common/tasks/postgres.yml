@@ -1,0 +1,14 @@
+- name: install postgres official repo
+  yum: name=https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
+
+- name: install postgresql96-devel
+  yum: name=postgresql96-devel
+
+- name: install postgresql96
+  yum: name=postgresql96
+
+- name: install postgresql96-server
+  yum: name=postgresql96-server
+
+- name: install postgresql96-contrib
+  yum: name=postgresql96-contrib
