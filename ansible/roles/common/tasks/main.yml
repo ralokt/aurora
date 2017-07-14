@@ -10,14 +10,13 @@
 - name: install nginx
   yum: name=nginx
 
-- name: install python34
-  yum: name=python34
-
-- name: install python34-devel
-  yum: name=python34-devel
-
-- name: install python-devel
-  yum: name=python-devel
+- name: install python packages
+  yum: name={{ item }}
+  with_items:
+    - python34
+    - python34-devel
+    - python-devel
+    - python34-pip
 
 - name: install libjpeg-devel
   yum: name=libjpeg-devel
@@ -25,17 +24,12 @@
 - name: install zlib-devel
   yum: name=zlib-devel
 
-- name: install python34-pip
-  yum: name=python34-pip
-
-- name: install uwsgi
-  yum: name=uwsgi
-
-- name: install uwsgi-plugin-python3
-  yum: name=uwsgi-plugin-python3
-
-- name: install uwsgi-logger-file
-  yum: name=uwsgi-logger-file
+- name: install uwsgi packages
+  yum: name={{ item }}
+  with_items:
+    - uwsgi
+    - uwsgi-plugin-python3
+    - uwsgi-logger-file
 
 - name: install rabbitmq-server
   yum: name=rabbitmq-server
