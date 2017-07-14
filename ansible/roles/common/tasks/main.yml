@@ -1,5 +1,5 @@
 ---
-- include: postgres.yml
+- include: postgresql.yml
 
 - name: add epel repo for extra packages from fedora
   yum: name=epel-release

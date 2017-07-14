@@ -23,18 +23,12 @@
 - name: Add official postgres repo
   yum: name=https://download.postgresql.org/pub/repos/yum/9.6/redhat/rhel-7-x86_64/pgdg-centos96-9.6-3.noarch.rpm
 
-- name: install postgresql96-devel
-  yum: name=postgresql96-devel
-
-- name: install postgresql96
-  yum: name=postgresql96
-
-- name: install postgresql96-server
-  yum: name=postgresql96-server
-
-- name: install postgresql96-contrib
-  yum: name=postgresql96-contrib
-
-- name: install pg_activity
-  yum: name=pg_activity
+- name: install postgresql packages
+  yum: name={{ item }}
+  with_items:
+    - postgresql96-devel
+    - postgresql96
+    - postgresql96-server
+    - postgresql96-contrib
+    - pg_activity
 
