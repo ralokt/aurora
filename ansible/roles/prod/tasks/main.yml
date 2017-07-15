@@ -1,14 +1,28 @@
 ---
+- name: install server maintenance and monitoring tools
+  yum: name={{ item }}
+  with_items:
+    - etckeeper
+    - nano
+    - yumcron
+    - logwatch
+    - fail2ban
+    - tmpwatch
+    - ntp
+    - system-storage-manager 
+    - monit 
+    - net-tools
 
-# etckeeper nano yumcron logwatch fail2ban tmpwatch # mein standard server foo
-# backupninja # meine bevorzugte backup lösung
-# policycoreutils-python # debugging zeugs für selinux
-# setroubleshoot-server # debugging zeugs für selinux
-# dialog # für backupninja
-# gcc # brauchte ich für irgendwas
-# system-storage-manager # erleichtert das arbeiten mit raid volumes
-# monit # mmonit installieren
-# net-tools # brauchte ich für debugging
-# ntp # notwendig wegen timesync zu tu time servern, weil sonst sso clusterfucken kann
-# sysreporter # um sysreports für backupninja zu generieren
-# cryptsetup # ???
+- name: install backupninja packages
+  yum: name={{ item }}
+  with_items:
+    - backupninja
+    - sysreporter
+    - dialog
+
+- name: install selinux debugging utils
+  yum: name={{ item }}
+  with_items:
+    - policycoreutils-python
+    - setroubleshoot-server
+
