@@ -1,4 +1,7 @@
 ---
+# This is run as user `root`
+# Creates DB, users and databases
+
 - name: initialize PostgreSQL
   command: /usr/pgsql-9.6/bin/postgresql96-setup initdb
            creates=/var/lib/pgsql/9.6/data/postgresql.conf
