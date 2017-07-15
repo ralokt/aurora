@@ -1,2 +1,6 @@
 ---
 - include: postgresql.yml
+
+- include: python.yml
+  become: true
+  become_user: vagrant
